@@ -9,6 +9,7 @@
 #define FANTASMA_DIREITA 'C'                                //define para qual caractere no mapa eh o fantasma que tem o sentido inicial para a direita;
 #define FANTASMA_BAIXO 'I'                                  //define para qual caractere no mapa eh o fantasma que tem o sentido inicial para baixo;
 #define FANTASMA_CIMA 'P'                                   //define para qual caractere no mapa eh o fantasma que tem o sentido inicial para cima;
+#define PACMAN_MODIFICADO '&'                               //define para qual caractere no mapa eh o pacMan modificado;
 
 //deifne para qual sentido os fantasmas estao indo;
 #define SENTIDO_ESQUERDA 'e'
@@ -21,6 +22,8 @@
 #define TELEPORTE '@'                                       //define para qual caractere no mapa eh o teleporte;
 #define COMIDA '*'                                          //define para qual caractere no mapa eh a comida;
 #define VAZIO ' '                                           //define para qual caractere no mapa eh o vazio;
+#define COMIDA_ESPECIAL '%'                                 //define para qual caractere no mapa eh uma comida especial (que da 5 pontos);
+#define COMIDA_MOD_PACMAN '!'                               //define para qual caractere no mapa eh uma comida que modifica o pacMan;
 
 //define para as jogadas que movimentam o pacMan no mapa:
 #define CIMA 'w'                                            //define para qual caractere faz o pacMan se mover para cima;
@@ -58,6 +61,7 @@ typedef struct {                            //STRUCT DO PACMAN:
     int pegouComida[5000];                  //contem o vetor de verificacao de quais jogadas o pacMan consumiu uma comida;
     int colidiuFantasma[5000];              //contem o vetor de verificacao de quais jogadas o pacMan colidiu com um fantasma;
     int vida;                               //contem a verificacao da vida do pacMan;
+    int pegouMod;
 } tPacMan;
 
 
@@ -90,6 +94,8 @@ typedef struct {                            //STRUCT DOS MAPAS:
     char mapaComidas[41][101];              //contem o mapa das comidas;
     char mapaTeleportes[41][101];           //contem o mapa dos teleportes;
     int trilha[41][101];                    //contem o mapa da trilha;
+    char mapaComidaEspecial[41][101];       //contem o mapa da comida especial;
+    char mapaComidaMod[41][101];            //contem o mapa da comdia que modifica o pacMan;
 } tMapa;
 
 
@@ -104,6 +110,8 @@ typedef struct {                            //STRUCT DO JOGO:
     int limiteJogadas;                      //contem o limite de jogadas;
     tTeleportes teleporte;                  //contem a struct de teleportes;         
     tMovimentos movimentos;                 //contem a struct das jogadas feitas;
+    tPosicao comidaEspecial;                //contem a struct da posicao da comida especial que da um bonus de 5 pontos na pontuacao final do pacMan;
+    tPosicao comidaMod;                     //contem a struct da posicao da comdia que modifica o caractere do pacMan;
 } tJogo;
 
 
@@ -115,6 +123,8 @@ tPacMan ProcuraPacMan(tMapa mapas, int linha, int coluna);
 tFantasmas ProcuraFantasmas(tMapa mapas, int linha, int coluna);
 tTeleportes ProcuraTeleporte(tMapa mapas, int linha, int coluna);
 int ContaQuantasComidas(tMapa mapas, int linha, int coluna);
+tPosicao EncontraComidaEspecial(tMapa mapas, int linha, int coluna);
+tPosicao EncontraComidaMod(tMapa mapas, int linha, int coluna);
 
 //funcoes para realizar a partida;
 void JogarPartida(tJogo jogo, char argv[]);
@@ -127,12 +137,15 @@ tJogo MovimentaFantasmas(tJogo jogoo, char jogada, int i);
     tMapa LimpaCaminhoFantasmas(tMapa mapasAntigos, tFantasmas fantasmas, char fantasmaDoCaso);
 tJogo MovimentaPacman(tJogo jogoo, char jogada, int i);
     tMapa PacManComeu(tMapa mapas, tPacMan pacMan, char jogada);
+    tMapa PacManComeuEspecial(tMapa mapas, tPacMan pacMan, char jogada);
+    tMapa PacManComeuMod(tMapa mapas, tPacMan pacMan, char jogada);
     tJogo PacManTeletransportou(tJogo jogoo, char jogada, int i);
     tJogo PacManEmCimaDoTeleporte(tJogo jogoo, int i);
     tPosicao ExecutaMovimentoPacMan(tPosicao posicaoPacMan, char jogada);
     tMapa LimpaCaminhoPacMan(tMapa mapas, tPacMan pacMan, char jogada);
     tMapa LimpaCaminhoPacManTeletransporte(tMapa mapas, tPacMan pacMan, tTeleportes teleporte, char jogada);
 tMapa AtualizaMapa(tMapa mapas, tPacMan pacMan, tFantasmas fantasmas, int linha, int coluna);
+tMapa AtualizaMapaMod(tMapa mapas, tPacMan pacMan, tFantasmas fantasmas, int linha, int coluna);
 void ImprimeMapaAtual(int linha, int coluna, tMapa mapas, tPacMan pacMan, char jogada);
 int PacManNoMapa(int linha, int coluna, tMapa mapas);
 
@@ -196,6 +209,8 @@ tJogo IniciarJogo(char argv[]) {
     jogo.fantasmas = ProcuraFantasmas(jogo.mapas, jogo.linha, jogo.coluna);                                             //chama a funcao que acha os fantasmas no mapa e guarda a posicao;            
     jogo.teleporte = ProcuraTeleporte(jogo.mapas, jogo.linha, jogo.coluna);                                             //chama a funcao que acha os teleportes no mapa e guarda a posicao;    
     jogo.qtdComidas = ContaQuantasComidas(jogo.mapas, jogo.linha, jogo.coluna);                                         //chama a funcao que conta as comidas que tem no mapa;
+    jogo.comidaEspecial = EncontraComidaEspecial(jogo.mapas, jogo.linha, jogo.coluna);
+    jogo.comidaMod = EncontraComidaMod(jogo.mapas, jogo.linha, jogo.coluna);
     DocumentoInicializacao(jogo.mapas, jogo.coluna, jogo.linha, posicaoLinhaInicial, posicaoColunaInicial, argv);                                                              
 
     fclose(mapaEncontrado);
@@ -206,8 +221,9 @@ tJogo IniciarJogo(char argv[]) {
 tMapa InicializaMapas(int linha, int coluna) {     //funcao que inicializa todos os mapas com as mesmas quantidades de linhas e colunas;
     tMapa mapas;
 
-    mapas.mapaGeral[linha][coluna];   mapas.mapaComidas[linha][coluna];
-    mapas.trilha[linha][coluna];      mapas.mapaTeleportes[linha][coluna];    
+    mapas.mapaGeral[linha][coluna];              mapas.mapaComidas[linha][coluna];     
+    mapas.trilha[linha][coluna];                 mapas.mapaTeleportes[linha][coluna]; 
+    mapas.mapaComidaEspecial[linha][coluna];     mapas.mapaComidaMod[linha][coluna];
 
     return mapas;
 }
@@ -221,6 +237,8 @@ tMapa LeMapa(FILE *mapaEncontrado, int linha, int coluna) {             //funcao
             fscanf(mapaEncontrado, "%c", &mapas.mapaGeral[i][j]);       //le caractere por caractere do mapa e insere no mapa geral;          
             mapas.mapaComidas[i][j] = mapas.mapaGeral[i][j];            //iguala o mapa de comidas ao mapa geral;
             mapas.mapaTeleportes[i][j] = mapas.mapaGeral[i][j];         //iguala o mapa de teleportes ao mapa geral;
+            mapas.mapaComidaEspecial[i][j] = mapas.mapaGeral[i][j];
+            mapas.mapaComidaMod[i][j] = mapas.mapaGeral[i][j];
             mapas.trilha[i][j] = -1;                                    //inicia todas as posicoes da trilha com -1;
         }
         fscanf(mapaEncontrado, "%*c");
@@ -298,6 +316,38 @@ tTeleportes ProcuraTeleporte(tMapa mapas, int linha, int coluna) {      //procur
     return teleporte;
 }
 
+tPosicao EncontraComidaEspecial(tMapa mapas, int linha, int coluna) {
+    tPosicao comidaEspecial;
+    int i=0, j=0;
+
+    for (i=0; i<linha; i++) {
+        for (j=0; j<coluna; j++) {
+            if (mapas.mapaGeral[i][j] == COMIDA_ESPECIAL) {
+                comidaEspecial.linha = i;
+                comidaEspecial.coluna = j;
+            }
+        }
+    }
+
+    return comidaEspecial;
+}
+
+tPosicao EncontraComidaMod(tMapa mapas, int linha, int coluna) {
+    tPosicao comidaMod;
+    int i=0, j=0;
+
+    for (i=0; i<linha; i++) {
+        for (j=0; j<coluna; j++) {
+            if (mapas.mapaGeral[i][j] == COMIDA_MOD_PACMAN) {
+                comidaMod.linha = i;
+                comidaMod.coluna = j;
+            }
+        }
+    }
+
+    return comidaMod;
+}
+
 int ContaQuantasComidas(tMapa mapas, int linha, int coluna) {          //conta a quantidade de comidas presentes no mapa;
     int qtdComidas=0, i=0, j=0;
 
@@ -333,14 +383,15 @@ void DocumentoInicializacao(tMapa mapas, int coluna, int linha, int posicaoLinha
 }
 
 void JogarPartida(tJogo jogo, char argv[]) {             //funcao em que o jogador ira inserir suas jogadas;
-    int i=1;
+    int i=1, contMod=0;
     char jogada;
     char caminho[1045];
     
     jogo.movimentos = InicializaMovimentos();           //iniciaiza a quantidade de jogadas na partida;
     jogo.pacMan.pontuacao = 0;                          //inicia a partida com a pontuacao do jogador zerada;
     jogo.pacMan.vida = 1;                               //inicia a partida com a vida do pacMan igual a 1, ou seja, vivo;
-    
+    jogo.pacMan.pegouMod = 0;  
+
     sprintf(caminho, "%s", argv);
 
     while(scanf("%c", &jogada)) {                       //enquanto uma jogada for inserida e nao atingir o limite de jogadas, o jogo vai rodar;   
@@ -355,16 +406,29 @@ void JogarPartida(tJogo jogo, char argv[]) {             //funcao em que o jogad
         jogo.movimentos = ContaJogadas(jogo.movimentos, jogada);
 
         jogo.pacMan.colidiuParede[i] = 0;   jogo.pacMan.usouTeleporte[i] = 0;                      
-        jogo.pacMan.pegouComida[i] = 0;     jogo.pacMan.colidiuFantasma[i] = 0;                     
+        jogo.pacMan.pegouComida[i] = 0;     jogo.pacMan.colidiuFantasma[i] = 0;                   
 
         jogo.fantasmas = VerificaParedeFantasma(jogo.mapas, jogo.fantasmas);                    
         jogo = MovimentaFantasmas(jogo, jogada, i);            
         jogo.mapas = AtualizaMapa(jogo.mapas, jogo.pacMan, jogo.fantasmas, jogo.linha, jogo.coluna);                  
+        
         if (jogo.pacMan.vida != 0) {
             jogo = MovimentaPacman(jogo, jogada, i);                                                        //chama a funcao que movimenta o pacMan de acordo com a jogada inserida;
             jogo.mapas = AtualizaMapa(jogo.mapas, jogo.pacMan, jogo.fantasmas, jogo.linha, jogo.coluna);                             
+            
+            if (jogo.pacMan.pegouMod != 0) {
+                contMod++;
+                if ((contMod > 0) && (contMod <= 15)) {
+                    jogo.mapas = AtualizaMapaMod(jogo.mapas, jogo.pacMan, jogo.fantasmas, jogo.linha, jogo.coluna);
+
+                    if (contMod == 15) {
+                        contMod = 0;
+                        jogo.pacMan.pegouMod = 0;
+                    }
+                }
+            }
         }
-        
+
         ImprimeMapaAtual(jogo.linha, jogo.coluna, jogo.mapas, jogo.pacMan, jogada);                        //imprime a situacao do mapa apos toda jogada, com as posicoes novas dos fantasmas e do pacMan;
 
         if (PacManNoMapa(jogo.linha, jogo.coluna, jogo.mapas) != 1) {        //se a funcao que verifica se o pacMan ainda esta no mapa retornar algo diferente de 1, quer dizer que ele foi morto por um fantasma;
@@ -403,7 +467,7 @@ tMovimentos InicializaMovimentos() {
 }
 
 tMovimento ZerarMovimentos(tMovimento movimento) {
-    movimento.qtd = movimento.bateu = movimento.comeu=0;
+    movimento.qtd = movimento.bateu = movimento.comeu = 0;
 
     return movimento;
 }
@@ -479,12 +543,14 @@ tJogo MovimentaFantasmas(tJogo jogo, char jogada, int i) {                      
 
     if (jogo.fantasmas.fantasmaB.existe == 1) {                                               //verifica se o fantasma B existe;
         fantasmaDoCaso = FANTASMA_ESQUERDA;
-        if ((jogo.fantasmas.fantasmaB.sentido == SENTIDO_ESQUERDA) && 
-            (jogo.mapas.mapaGeral[fantasmaBlinha][fantasmaBcoluna-1] == PACMAN) && (jogada == 'd')) {
+        if (((jogo.fantasmas.fantasmaB.sentido == SENTIDO_ESQUERDA) && 
+            ((jogo.mapas.mapaGeral[fantasmaBlinha][fantasmaBcoluna-1] == PACMAN) || 
+            (jogo.mapas.mapaGeral[fantasmaBlinha][fantasmaBcoluna-1] == PACMAN_MODIFICADO)) && (jogada == 'd'))) {
             jogo.pacMan.vida = 0;
             jogo.pacMan.colidiuFantasma[i] = 1;                                                                                                                //retorna que o pacMan morreu;                                                                                                                                 //se nao for nenhum dos casos acima, como por exemplo o fantasma encontrar uma comida, ele anda normalmente;
-        } else if ((jogo.fantasmas.fantasmaB.sentido == SENTIDO_DIREITA) && 
-                   (jogo.mapas.mapaGeral[fantasmaBlinha][fantasmaBcoluna+1] == PACMAN) && (jogada == 'a')) {
+        } else if (((jogo.fantasmas.fantasmaB.sentido == SENTIDO_DIREITA) && 
+                   ((jogo.mapas.mapaGeral[fantasmaBlinha][fantasmaBcoluna+1] == PACMAN) ||
+                   (jogo.mapas.mapaGeral[fantasmaBlinha][fantasmaBcoluna-1] == PACMAN_MODIFICADO)) && (jogada == 'a'))) {
             jogo.pacMan.vida = 0;
             jogo.pacMan.colidiuFantasma[i] = 1; 
         }
@@ -494,8 +560,9 @@ tJogo MovimentaFantasmas(tJogo jogo, char jogada, int i) {                      
 
     if (jogo.fantasmas.fantasmaC.existe == 1) {                                               //verifica se o fantasma C existe;
         fantasmaDoCaso = FANTASMA_DIREITA;                                                               
-        if ((jogo.fantasmas.fantasmaC.sentido == SENTIDO_ESQUERDA) && 
-            (jogo.mapas.mapaGeral[fantasmaClinha][fantasmaCcoluna-1] == PACMAN) && (jogada == 'd')) {
+        if (((jogo.fantasmas.fantasmaC.sentido == SENTIDO_ESQUERDA) && 
+            ((jogo.mapas.mapaGeral[fantasmaClinha][fantasmaCcoluna-1] == PACMAN) ||
+            (jogo.mapas.mapaGeral[fantasmaClinha][fantasmaCcoluna-1] == PACMAN_MODIFICADO)) && (jogada == 'd'))) {
             jogo.pacMan.vida = 0;
             jogo.pacMan.colidiuFantasma[i] = 1;
         } else if ((jogo.fantasmas.fantasmaC.sentido == SENTIDO_DIREITA) &&
@@ -509,8 +576,9 @@ tJogo MovimentaFantasmas(tJogo jogo, char jogada, int i) {                      
 
     if (jogo.fantasmas.fantasmaI.existe == 1) {                                               //verifica se o fantasma I existe;
         fantasmaDoCaso = FANTASMA_BAIXO;
-        if ((jogo.fantasmas.fantasmaI.sentido == SENTIDO_BAIXO) && 
-            (jogo.mapas.mapaGeral[fantasmaIlinha+1][fantasmaIcoluna] == PACMAN) && (jogada == 'w')) {
+        if (((jogo.fantasmas.fantasmaI.sentido == SENTIDO_BAIXO) && 
+            ((jogo.mapas.mapaGeral[fantasmaIlinha+1][fantasmaIcoluna] == PACMAN) ||
+            (jogo.mapas.mapaGeral[fantasmaIlinha+1][fantasmaIcoluna] == PACMAN_MODIFICADO)) && (jogada == 'w'))) {
             jogo.pacMan.vida = 0;
             jogo.pacMan.colidiuFantasma[i] = 1;
         } else if ((jogo.fantasmas.fantasmaI.sentido == SENTIDO_CIMA) && 
@@ -524,8 +592,9 @@ tJogo MovimentaFantasmas(tJogo jogo, char jogada, int i) {                      
 
     if (jogo.fantasmas.fantasmaP.existe == 1) {                                               //verifica se o fantasma P existe;
         fantasmaDoCaso = FANTASMA_CIMA;
-        if ((jogo.fantasmas.fantasmaP.sentido == SENTIDO_BAIXO) && 
-            (jogo.mapas.mapaGeral[fantasmaPlinha+1][fantasmaPcoluna] == PACMAN) && (jogada == 'w')) {
+        if (((jogo.fantasmas.fantasmaP.sentido == SENTIDO_BAIXO) && 
+            ((jogo.mapas.mapaGeral[fantasmaPlinha+1][fantasmaPcoluna] == PACMAN) ||
+            (jogo.mapas.mapaGeral[fantasmaPlinha+1][fantasmaPcoluna] == PACMAN_MODIFICADO)) && (jogada == 'w'))) {
             jogo.pacMan.vida = 0;
             jogo.pacMan.colidiuFantasma[i] = 1;
         } else if ((jogo.fantasmas.fantasmaP.sentido == SENTIDO_CIMA) &&
@@ -588,6 +657,10 @@ tMapa LimpaCaminhoFantasmas(tMapa mapas, tFantasmas fantasmas, char fantasmaDoCa
                 mapas.mapaGeral[fantasmaBlinha][fantasmaBcoluna+1] = COMIDA;
             } else if (mapas.mapaTeleportes[fantasmaBlinha][fantasmaBcoluna+1] ==  TELEPORTE) {
                 mapas.mapaGeral[fantasmaBlinha][fantasmaBcoluna+1] = TELEPORTE;
+            } else if (mapas.mapaComidaEspecial[fantasmaBlinha][fantasmaBcoluna+1] == COMIDA_ESPECIAL) {
+                mapas.mapaGeral[fantasmaBlinha][fantasmaBcoluna+1] = COMIDA_ESPECIAL; 
+            } else if (mapas.mapaComidaMod[fantasmaBlinha][fantasmaBcoluna+1] == COMIDA_MOD_PACMAN) {
+                mapas.mapaGeral[fantasmaBlinha][fantasmaBcoluna+1] = COMIDA_MOD_PACMAN; 
             } else {
                 mapas.mapaGeral[fantasmaBlinha][fantasmaBcoluna+1] = VAZIO;
             }
@@ -596,6 +669,10 @@ tMapa LimpaCaminhoFantasmas(tMapa mapas, tFantasmas fantasmas, char fantasmaDoCa
                 mapas.mapaGeral[fantasmaBlinha][fantasmaBcoluna-1] = COMIDA;
             } else if (mapas.mapaTeleportes[fantasmaBlinha][fantasmaBcoluna-1] == TELEPORTE) {
                 mapas.mapaGeral[fantasmaBlinha][fantasmaBcoluna-1] = TELEPORTE;
+            } else if (mapas.mapaComidaEspecial[fantasmaBlinha][fantasmaBcoluna-1] == COMIDA_ESPECIAL) {
+                mapas.mapaGeral[fantasmaBlinha][fantasmaBcoluna-1] = COMIDA_ESPECIAL; 
+            } else if (mapas.mapaComidaMod[fantasmaBlinha][fantasmaBcoluna-1] == COMIDA_MOD_PACMAN) {
+                mapas.mapaGeral[fantasmaBlinha][fantasmaBcoluna+1] = COMIDA_MOD_PACMAN; 
             } else {
                 mapas.mapaGeral[fantasmaBlinha][fantasmaBcoluna-1] = VAZIO;
             }
@@ -607,6 +684,10 @@ tMapa LimpaCaminhoFantasmas(tMapa mapas, tFantasmas fantasmas, char fantasmaDoCa
                 mapas.mapaGeral[fantasmaClinha][fantasmaCcoluna+1] = COMIDA;
             } else if (mapas.mapaTeleportes[fantasmaClinha][fantasmaCcoluna+1] == TELEPORTE) {
                 mapas.mapaGeral[fantasmaClinha][fantasmaCcoluna+1] = TELEPORTE;
+            } else if (mapas.mapaComidaEspecial[fantasmaClinha][fantasmaCcoluna+1] == COMIDA_ESPECIAL) {
+                mapas.mapaGeral[fantasmaClinha][fantasmaCcoluna+1] = COMIDA_ESPECIAL; 
+            } else if (mapas.mapaComidaMod[fantasmaClinha][fantasmaCcoluna+1] == COMIDA_MOD_PACMAN) {
+                mapas.mapaGeral[fantasmaClinha][fantasmaCcoluna+1] = COMIDA_MOD_PACMAN; 
             } else {
                 mapas.mapaGeral[fantasmaClinha][fantasmaCcoluna+1] = VAZIO;
             }
@@ -615,6 +696,10 @@ tMapa LimpaCaminhoFantasmas(tMapa mapas, tFantasmas fantasmas, char fantasmaDoCa
                 mapas.mapaGeral[fantasmaClinha][fantasmaCcoluna-1] = COMIDA;
             } else if (mapas.mapaTeleportes[fantasmaClinha][fantasmaCcoluna-1] == TELEPORTE) {
                 mapas.mapaGeral[fantasmaClinha][fantasmaCcoluna-1] = TELEPORTE;
+            } else if (mapas.mapaComidaEspecial[fantasmaClinha][fantasmaCcoluna-1] == COMIDA_ESPECIAL) {
+                mapas.mapaGeral[fantasmaClinha][fantasmaCcoluna-1] = COMIDA_ESPECIAL; 
+            } else if (mapas.mapaComidaMod[fantasmaClinha][fantasmaCcoluna-1] == COMIDA_MOD_PACMAN) {
+                mapas.mapaGeral[fantasmaClinha][fantasmaCcoluna-1] = COMIDA_MOD_PACMAN; 
             } else {
                 mapas.mapaGeral[fantasmaClinha][fantasmaCcoluna-1] = VAZIO;
             }
@@ -626,6 +711,10 @@ tMapa LimpaCaminhoFantasmas(tMapa mapas, tFantasmas fantasmas, char fantasmaDoCa
                 mapas.mapaGeral[fantasmaIlinha-1][fantasmaIcoluna] = COMIDA;
             } else if (mapas.mapaTeleportes[fantasmaIlinha-1][fantasmaIcoluna] == TELEPORTE) {
                 mapas.mapaGeral[fantasmaIlinha-1][fantasmaIcoluna] = TELEPORTE;
+            } else if (mapas.mapaComidaEspecial[fantasmaIlinha-1][fantasmaIcoluna] == COMIDA_ESPECIAL) {
+                mapas.mapaGeral[fantasmaIlinha-1][fantasmaIcoluna] = COMIDA_ESPECIAL; 
+            } else if (mapas.mapaComidaMod[fantasmaIlinha-1][fantasmaIcoluna] == COMIDA_MOD_PACMAN) {
+                mapas.mapaGeral[fantasmaIlinha-1][fantasmaIcoluna] = COMIDA_MOD_PACMAN; 
             } else {
                 mapas.mapaGeral[fantasmaIlinha-1][fantasmaIcoluna] = VAZIO;
             }
@@ -634,6 +723,10 @@ tMapa LimpaCaminhoFantasmas(tMapa mapas, tFantasmas fantasmas, char fantasmaDoCa
                 mapas.mapaGeral[fantasmaIlinha+1][fantasmaIcoluna] = COMIDA;
             } else if (mapas.mapaTeleportes[fantasmaIlinha+1][fantasmaIcoluna] == TELEPORTE) {
                 mapas.mapaGeral[fantasmaIlinha+1][fantasmaIcoluna] = TELEPORTE;
+            } else if (mapas.mapaComidaEspecial[fantasmaIlinha+1][fantasmaIcoluna] == COMIDA_ESPECIAL) {
+                mapas.mapaGeral[fantasmaIlinha+1][fantasmaIcoluna] = COMIDA_ESPECIAL; 
+            } else if (mapas.mapaComidaMod[fantasmaIlinha+1][fantasmaIcoluna] == COMIDA_MOD_PACMAN) {
+                mapas.mapaGeral[fantasmaIlinha+1][fantasmaIcoluna] = COMIDA_MOD_PACMAN; 
             } else {
                 mapas.mapaGeral[fantasmaIlinha+1][fantasmaIcoluna] = VAZIO;
             }
@@ -645,6 +738,10 @@ tMapa LimpaCaminhoFantasmas(tMapa mapas, tFantasmas fantasmas, char fantasmaDoCa
                 mapas.mapaGeral[fantasmaPlinha-1][fantasmaPcoluna] = COMIDA;
             } else if (mapas.mapaTeleportes[fantasmaPlinha-1][fantasmaPcoluna] == TELEPORTE) {
                 mapas.mapaGeral[fantasmaPlinha-1][fantasmaPcoluna] = TELEPORTE;
+            } else if (mapas.mapaComidaEspecial[fantasmaPlinha-1][fantasmaPcoluna] == COMIDA_ESPECIAL) {
+                mapas.mapaGeral[fantasmaPlinha-1][fantasmaPcoluna] = COMIDA_ESPECIAL; 
+            } else if (mapas.mapaComidaMod[fantasmaPlinha-1][fantasmaPcoluna] == COMIDA_MOD_PACMAN) {
+                mapas.mapaGeral[fantasmaPlinha-1][fantasmaPcoluna] = COMIDA_MOD_PACMAN; 
             } else {
                 mapas.mapaGeral[fantasmaPlinha-1][fantasmaPcoluna] = VAZIO;
             }
@@ -653,6 +750,10 @@ tMapa LimpaCaminhoFantasmas(tMapa mapas, tFantasmas fantasmas, char fantasmaDoCa
                 mapas.mapaGeral[fantasmaPlinha+1][fantasmaPcoluna] = COMIDA;
             } else if (mapas.mapaTeleportes[fantasmaPlinha+1][fantasmaPcoluna] == TELEPORTE) {
                 mapas.mapaGeral[fantasmaPlinha+1][fantasmaPcoluna] = TELEPORTE;
+            } else if (mapas.mapaComidaEspecial[fantasmaPlinha+1][fantasmaPcoluna] == COMIDA_ESPECIAL) {
+                mapas.mapaGeral[fantasmaPlinha+1][fantasmaPcoluna] = COMIDA_ESPECIAL; 
+            } else if (mapas.mapaComidaMod[fantasmaPlinha+1][fantasmaPcoluna] == COMIDA_MOD_PACMAN) {
+                mapas.mapaGeral[fantasmaPlinha+1][fantasmaPcoluna] = COMIDA_MOD_PACMAN; 
             } else {
                 mapas.mapaGeral[fantasmaPlinha+1][fantasmaPcoluna] = VAZIO;
             }
@@ -673,6 +774,12 @@ tJogo MovimentaPacman(tJogo jogo, char jogada, int i) {                         
             jogo.movimentos.movimentoW.comeu++;
             jogo.qtdComidas--;  
             jogo.pacMan.pontuacao++;                                                                                       
+        } else if (jogo.mapas.mapaGeral[pacManLinha-1][pacManColuna] == COMIDA_ESPECIAL) {
+            jogo.mapas = PacManComeuEspecial(jogo.mapas, jogo.pacMan, jogada);
+            jogo.pacMan.pontuacao+=5;
+        } else if (jogo.mapas.mapaGeral[pacManLinha-1][pacManColuna] == COMIDA_MOD_PACMAN) {
+            jogo.mapas = PacManComeuMod(jogo.mapas, jogo.pacMan, jogada);
+            jogo.pacMan.pegouMod = 1;
         }else if (jogo.mapas.mapaGeral[pacManLinha-1][pacManColuna] == TELEPORTE) {
             jogo = PacManTeletransportou(jogo, jogada, i);                                                                   
             jogo.mapas = LimpaCaminhoPacManTeletransporte(jogo.mapas, jogo.pacMan, jogo.teleporte, jogada);                                          
@@ -710,6 +817,12 @@ tJogo MovimentaPacman(tJogo jogo, char jogada, int i) {                         
             jogo.movimentos.movimentoS.comeu++;
             jogo.qtdComidas--;         
             jogo.pacMan.pontuacao++;                                                              
+        } else if (jogo.mapas.mapaGeral[pacManLinha+1][pacManColuna] == COMIDA_ESPECIAL) {
+            jogo.mapas = PacManComeuEspecial(jogo.mapas, jogo.pacMan, jogada);
+            jogo.pacMan.pontuacao+=5;
+        } else if (jogo.mapas.mapaGeral[pacManLinha+1][pacManColuna] == COMIDA_MOD_PACMAN) {
+            jogo.mapas = PacManComeuMod(jogo.mapas, jogo.pacMan, jogada);
+            jogo.pacMan.pegouMod = 1;
         } else if (jogo.mapas.mapaGeral[pacManLinha+1][pacManColuna] == TELEPORTE) {
             jogo = PacManTeletransportou(jogo, jogada, i);
             jogo.mapas = LimpaCaminhoPacManTeletransporte(jogo.mapas, jogo.pacMan, jogo.teleporte, jogada);   
@@ -746,6 +859,12 @@ tJogo MovimentaPacman(tJogo jogo, char jogada, int i) {                         
             jogo.movimentos.movimentoA.comeu++;  
             jogo.qtdComidas--;           
             jogo.pacMan.pontuacao++;                                                                                                                                
+        } else if (jogo.mapas.mapaGeral[pacManLinha][pacManColuna-1] == COMIDA_ESPECIAL) {
+            jogo.mapas = PacManComeuEspecial(jogo.mapas, jogo.pacMan, jogada);
+            jogo.pacMan.pontuacao+=5; 
+        } else if (jogo.mapas.mapaGeral[pacManLinha][pacManColuna-1] == COMIDA_MOD_PACMAN) {
+            jogo.mapas = PacManComeuMod(jogo.mapas, jogo.pacMan, jogada);
+            jogo.pacMan.pegouMod = 1;
         } else if (jogo.mapas.mapaGeral[pacManLinha][pacManColuna-1] == TELEPORTE) {
             jogo = PacManTeletransportou(jogo, jogada, i);
             jogo.mapas = LimpaCaminhoPacManTeletransporte(jogo.mapas, jogo.pacMan, jogo.teleporte, jogada);    
@@ -782,6 +901,12 @@ tJogo MovimentaPacman(tJogo jogo, char jogada, int i) {                         
             jogo.movimentos.movimentoD.comeu++; 
             jogo.qtdComidas--;        
             jogo.pacMan.pontuacao++;                                                               
+        } else if (jogo.mapas.mapaGeral[pacManLinha][pacManColuna+1] == COMIDA_ESPECIAL) {
+            jogo.mapas = PacManComeuEspecial(jogo.mapas, jogo.pacMan, jogada);
+            jogo.pacMan.pontuacao+=5;
+        } else if (jogo.mapas.mapaGeral[pacManLinha][pacManColuna+1] == COMIDA_MOD_PACMAN) {
+            jogo.mapas = PacManComeuMod(jogo.mapas, jogo.pacMan, jogada);
+            jogo.pacMan.pegouMod = 1;
         } else if (jogo.mapas.mapaGeral[pacManLinha][pacManColuna+1] == TELEPORTE) {
             jogo = PacManTeletransportou(jogo, jogada, i);
             jogo.mapas = LimpaCaminhoPacManTeletransporte(jogo.mapas, jogo.pacMan, jogo.teleporte, jogada);   
@@ -835,6 +960,60 @@ tMapa PacManComeu(tMapa mapas, tPacMan pacMan, char jogada) {                   
     
     else if (jogada == 'd') {                                                         //se a jogada for para a direita...
         mapas.mapaComidas[pacManLinha][pacManColuna+1] = VAZIO;
+        mapas.mapaGeral[pacManLinha][pacManColuna+1] = VAZIO;
+    }
+
+    return mapas;
+}
+
+tMapa PacManComeuEspecial(tMapa mapas, tPacMan pacMan, char jogada) {
+    int pacManLinha = pacMan.posicaoPacMan.linha;
+    int pacManColuna = pacMan.posicaoPacMan.coluna;
+    
+    if (jogada == 'w') {                                                              //se a jogada foi para cima...
+        mapas.mapaComidaEspecial[pacManLinha-1][pacManColuna] = VAZIO;
+        mapas.mapaGeral[pacManLinha-1][pacManColuna] = VAZIO;                                        
+    } 
+    
+    else if (jogada == 's') {                                                          //se a jogada for para baixo...
+        mapas.mapaComidaEspecial[pacManLinha+1][pacManColuna] = VAZIO;
+        mapas.mapaGeral[pacManLinha+1][pacManColuna] = VAZIO;
+    } 
+    
+    else if (jogada == 'a') {                                                        //se a jogada for para a esquerda...
+        mapas.mapaComidaEspecial[pacManLinha][pacManColuna-1] = VAZIO;
+        mapas.mapaGeral[pacManLinha][pacManColuna-1] = VAZIO;
+    } 
+    
+    else if (jogada == 'd') {                                                         //se a jogada for para a direita...
+        mapas.mapaComidaEspecial[pacManLinha][pacManColuna+1] = VAZIO;
+        mapas.mapaGeral[pacManLinha][pacManColuna+1] = VAZIO;
+    }
+
+    return mapas;
+}
+
+tMapa PacManComeuMod(tMapa mapas, tPacMan pacMan, char jogada) {
+    int pacManLinha = pacMan.posicaoPacMan.linha;
+    int pacManColuna = pacMan.posicaoPacMan.coluna;
+    
+    if (jogada == 'w') {                                                              //se a jogada foi para cima...
+        mapas.mapaComidaMod[pacManLinha-1][pacManColuna] = VAZIO;
+        mapas.mapaGeral[pacManLinha-1][pacManColuna] = VAZIO;                                        
+    } 
+    
+    else if (jogada == 's') {                                                          //se a jogada for para baixo...
+        mapas.mapaComidaMod[pacManLinha+1][pacManColuna] = VAZIO;
+        mapas.mapaGeral[pacManLinha+1][pacManColuna] = VAZIO;
+    } 
+    
+    else if (jogada == 'a') {                                                        //se a jogada for para a esquerda...
+        mapas.mapaComidaMod[pacManLinha][pacManColuna-1] = VAZIO;
+        mapas.mapaGeral[pacManLinha][pacManColuna-1] = VAZIO;
+    } 
+    
+    else if (jogada == 'd') {                                                         //se a jogada for para a direita...
+        mapas.mapaComidaMod[pacManLinha][pacManColuna+1] = VAZIO;
         mapas.mapaGeral[pacManLinha][pacManColuna+1] = VAZIO;
     }
 
@@ -1039,6 +1218,21 @@ tMapa AtualizaMapa(tMapa mapas, tPacMan pacMan, tFantasmas fantasmas, int linha,
     return mapas;
 }
 
+tMapa AtualizaMapaMod(tMapa mapas, tPacMan pacMan, tFantasmas fantasmas, int linha, int coluna) {
+    int pacManLinha = pacMan.posicaoPacMan.linha;     int pacManColuna = pacMan.posicaoPacMan.coluna;
+    int i=0, j=0;
+
+    for (i=0; i<linha; i++) {
+        for (j=0; j<coluna; j++) {
+            if ((pacMan.vida == 1) && (i == pacManLinha) && (j == pacManColuna)) {
+                mapas.mapaGeral[i][j] = PACMAN_MODIFICADO;
+            }
+        }
+    }
+
+    return mapas;
+}
+
 void ImprimeMapaAtual(int linha, int coluna, tMapa mapas, tPacMan pacMan, char jogada) {                          //imprime o mapa na sua situacao atual apos cada jogada e sua pontuacao acumulada ate entao;
     int i=0, j=0;
 
@@ -1058,7 +1252,7 @@ int PacManNoMapa(int linha, int coluna, tMapa mapas) {                          
 
     for (i=0; i<linha; i++) {                                          
         for (j=0; j<coluna; j++) {
-            if (mapas.mapaGeral[i][j]==PACMAN) {        //se o pacMan estiver no mapa ainda, determina 1 para a variavel e retorna; 
+            if ((mapas.mapaGeral[i][j]==PACMAN) || (mapas.mapaGeral[i][j]==PACMAN_MODIFICADO)) {        //se o pacMan estiver no mapa ainda, determina 1 para a variavel e retorna; 
                 pacManNoMapa = 1;
             }
         }
