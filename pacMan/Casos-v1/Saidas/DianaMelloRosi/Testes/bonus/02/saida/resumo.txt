@@ -1,0 +1,39 @@
+Movimento 8 (d) pegou comida
+Movimento 9 (d) pegou comida
+Movimento 10 (d) pegou comida
+Movimento 11 (d) pegou comida
+Movimento 12 (d) pegou comida
+Movimento 18 (a) pegou comida
+Movimento 29 (w) colidiu na parede
+Movimento 32 (w) colidiu na parede
+Movimento 33 (w) colidiu na parede
+Movimento 34 (a) colidiu na parede
+Movimento 35 (d) colidiu na parede
+Movimento 36 (a) colidiu na parede
+Movimento 37 (d) colidiu na parede
+Movimento 38 (a) colidiu na parede
+Movimento 39 (d) colidiu na parede
+Movimento 44 (d) pegou comida
+Movimento 45 (d) pegou comida
+Movimento 46 (d) pegou comida
+Movimento 47 (d) pegou comida
+Movimento 48 (d) pegou comida
+Movimento 1 (w) colidiu na parede
+Movimento 9 (d) pegou comida
+Movimento 10 (d) pegou comida
+Movimento 11 (d) pegou comida
+Movimento 12 (d) pegou comida
+Movimento 13 (d) pegou comida
+Movimento 23 (a) pegou comida
+Movimento 38 (d) pegou comida
+Movimento 39 (d) pegou comida
+Movimento 40 (d) pegou comida
+Movimento 41 (d) pegou comida
+Movimento 42 (d) pegou comida
+Movimento 1 (w) colidiu na parede
+Movimento 9 (d) pegou comida
+Movimento 10 (d) pegou comida
+Movimento 11 (d) pegou comida
+Movimento 12 (d) pegou comida
+Movimento 13 (d) pegou comida
+Movimento 19 (a) pegou comida

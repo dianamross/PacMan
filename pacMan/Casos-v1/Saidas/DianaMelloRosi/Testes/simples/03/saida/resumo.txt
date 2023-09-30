@@ -1,0 +1,5 @@
+Movimento 4 (w) colidiu na parede
+Movimento 4 (d) fim de jogo por encostar em um fantasma
+Movimento 3 (d) fim de jogo por encostar em um fantasma
+Movimento 4 (w) colidiu na parede
+Movimento 4 (w) colidiu na parede
