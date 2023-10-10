@@ -454,7 +454,7 @@ void JogarPartida(tJogo jogo, char argv[]) {            //funcao em que o jogado
     DocumentoEstatisticas(jogo.movimentos, caminho);       //chama a funcao que faz o documento de estatisticas da partida;
 }
 
-tMovimentos InicializaMovimentos() {
+tMovimentos InicializaMovimentos() {                       //funcao que inicializa todos os movimentos;
     tMovimentos movimentos;
     
     movimentos.qtdJogadas = 0;
@@ -470,16 +470,16 @@ tMovimento ZerarMovimentos(tMovimento movimento) {
     return movimento;
 }
 
-tMovimentos ContaJogadas(tMovimentos movimentos, char jogada) {
+tMovimentos ContaJogadas(tMovimentos movimentos, char jogada) {  
     movimentos.qtdJogadas++; 
 
-    if (jogada == 'w') {
+    if (jogada == CIMA) {
         movimentos.movimentoW.qtd++;
-    } else if (jogada == 'a') {
+    } else if (jogada == ESQUERDA) {
         movimentos.movimentoA.qtd++;
-    } else if (jogada == 'd') {
+    } else if (jogada == DIREITA) {
         movimentos.movimentoD.qtd++;
-    } else if (jogada == 's') {
+    } else if (jogada == BAIXO) {
         movimentos.movimentoS.qtd++;
     }
     
@@ -492,13 +492,13 @@ tFantasmas VerificaParedeFantasma(tMapa mapas, tFantasmas fantasmas) {
     int fantasmaClinha = fantasmas.fantasmaC.posicaoFantasma.linha;      int fantasmaPlinha = fantasmas.fantasmaP.posicaoFantasma.linha;  
     int fantasmaCcoluna = fantasmas.fantasmaC.posicaoFantasma.coluna;    int fantasmaPcoluna = fantasmas.fantasmaP.posicaoFantasma.coluna;
 
-    if (fantasmas.fantasmaB.existe == 1) {                                  //verifica se o fantasma B existe;
+    if (fantasmas.fantasmaB.existe == 1) {                                                 //verifica se o fantasma B existe;
         if ((fantasmas.fantasmaB.sentido == SENTIDO_ESQUERDA) && 
             (mapas.mapaGeral[fantasmaBlinha][fantasmaBcoluna-1] == PAREDE)) {              
-            fantasmas.fantasmaB.sentido = SENTIDO_DIREITA;                         
+            fantasmas.fantasmaB.sentido = SENTIDO_DIREITA;                                 //se do lado esquerdo do fantasma tem uma parede, ele muda o sentido para a direita;
         } else if ((fantasmas.fantasmaB.sentido == SENTIDO_DIREITA) && 
                     (mapas.mapaGeral[fantasmaBlinha][fantasmaBcoluna+1] == PAREDE)) {
-            fantasmas.fantasmaB.sentido = SENTIDO_ESQUERDA;                        
+            fantasmas.fantasmaB.sentido = SENTIDO_ESQUERDA;                                //se do lado direito do fantasma tem uma parede, ele muda o sentido para a esuqerda;
         }
     } 
     if (fantasmas.fantasmaC.existe == 1) {                              
@@ -510,61 +510,61 @@ tFantasmas VerificaParedeFantasma(tMapa mapas, tFantasmas fantasmas) {
             fantasmas.fantasmaC.sentido = SENTIDO_ESQUERDA;                          
         }
     }
-    if (fantasmas.fantasmaI.existe == 1) {                                  //verifica se o fantasma I existe;
+    if (fantasmas.fantasmaI.existe == 1) {                                                 //verifica se o fantasma I existe;
         if ((fantasmas.fantasmaI.sentido == SENTIDO_BAIXO) && 
             (mapas.mapaGeral[fantasmaIlinha+1][fantasmaIcoluna] == PAREDE)) {                  
-            fantasmas.fantasmaI.sentido = SENTIDO_CIMA;                          //se em baixo do fantasma tem uma parede, ele muda o sentido e executa um movimento para cima;
+            fantasmas.fantasmaI.sentido = SENTIDO_CIMA;                                    //se em baixo do fantasma tem uma parede, ele muda o sentido para cima;
         } else if ((fantasmas.fantasmaI.sentido == SENTIDO_CIMA) && 
                    (mapas.mapaGeral[fantasmaIlinha-1][fantasmaIcoluna] == PAREDE)) {
-            fantasmas.fantasmaI.sentido = SENTIDO_BAIXO;                          //se em cima do fantasma tem uma parede, ele muda o sentido e executa um movimento para baixo;
+            fantasmas.fantasmaI.sentido = SENTIDO_BAIXO;                                   //se em cima do fantasma tem uma parede, ele muda o sentido para baixo;
         }
     }
-    if (fantasmas.fantasmaP.existe == 1) {                                  //verifica se o fantasma P existe;
+    if (fantasmas.fantasmaP.existe == 1) {                                  
         if ((fantasmas.fantasmaP.sentido == SENTIDO_BAIXO) && 
             (mapas.mapaGeral[fantasmaPlinha+1][fantasmaPcoluna] == PAREDE)) {
-            fantasmas.fantasmaP.sentido = SENTIDO_CIMA;                          //se em baixo do fantasma tem uma parede, ele muda o sentido e executa um movimento para cim
+            fantasmas.fantasmaP.sentido = SENTIDO_CIMA;                        
         } else if ((fantasmas.fantasmaP.sentido == SENTIDO_CIMA) &&
                    (mapas.mapaGeral[fantasmaPlinha-1][fantasmaPcoluna] == PAREDE)) {
-            fantasmas.fantasmaP.sentido = SENTIDO_BAIXO;                          //se em cima do fantasma tem uma parede, ele muda o sentido e executa um movimento para baixo;
+            fantasmas.fantasmaP.sentido = SENTIDO_BAIXO;                          
         }
     }
 
     return fantasmas;
 }
 
-tJogo MovimentaFantasmas(tJogo jogo, char jogada, int i) {                                          //movimenta o fantasma a cada jogada;
-    char fantasmaDoCaso;                                                                      //determina uma constante char para a proxima funcao a ser chamada saber a qual dos fantasmas esta se referindo;
+tJogo MovimentaFantasmas(tJogo jogo, char jogada, int i) {              //movimenta o fantasma a cada jogada;
+    char fantasmaDoCaso;                                                //determina uma constante char para a proxima funcao a ser chamada saber a qual dos fantasmas esta se referindo;
     int fantasmaBlinha = jogo.fantasmas.fantasmaB.posicaoFantasma.linha;      int fantasmaIlinha = jogo.fantasmas.fantasmaI.posicaoFantasma.linha; 
     int fantasmaBcoluna = jogo.fantasmas.fantasmaB.posicaoFantasma.coluna;    int fantasmaIcoluna = jogo.fantasmas.fantasmaI.posicaoFantasma.coluna;
     int fantasmaClinha = jogo.fantasmas.fantasmaC.posicaoFantasma.linha;      int fantasmaPlinha = jogo.fantasmas.fantasmaP.posicaoFantasma.linha;  
     int fantasmaCcoluna = jogo.fantasmas.fantasmaC.posicaoFantasma.coluna;    int fantasmaPcoluna = jogo.fantasmas.fantasmaP.posicaoFantasma.coluna;
 
-    if (jogo.fantasmas.fantasmaB.existe == 1) {                                               //verifica se o fantasma B existe;
+    if (jogo.fantasmas.fantasmaB.existe == 1) {                                               //se o fantasma B existe...
         fantasmaDoCaso = FANTASMA_ESQUERDA;
-        if (((jogo.fantasmas.fantasmaB.sentido == SENTIDO_ESQUERDA) && 
+        if (((jogo.fantasmas.fantasmaB.sentido == SENTIDO_ESQUERDA) &&                        //verifica o sentido do fantasma e se o pacman esta na sua posicao futura;
             ((jogo.mapas.mapaGeral[fantasmaBlinha][fantasmaBcoluna-1] == PACMAN) || 
-            (jogo.mapas.mapaGeral[fantasmaBlinha][fantasmaBcoluna-1] == PACMAN_MODIFICADO)) && (jogada == 'd'))) {
-            jogo.pacMan.vida = 0;
-            jogo.pacMan.colidiuFantasma[i] = 1;                                                                                                                //retorna que o pacMan morreu;                                                                                                                                 //se nao for nenhum dos casos acima, como por exemplo o fantasma encontrar uma comida, ele anda normalmente;
+            (jogo.mapas.mapaGeral[fantasmaBlinha][fantasmaBcoluna-1] == PACMAN_MODIFICADO)) && (jogada == DIREITA))) {
+            jogo.pacMan.vida = 0;                                                             //se o fantasma colidir com o pacman, o pacman morre e retorna que colidiu com um fantasma;
+            jogo.pacMan.colidiuFantasma[i] = 1;                                              
         } else if (((jogo.fantasmas.fantasmaB.sentido == SENTIDO_DIREITA) && 
                    ((jogo.mapas.mapaGeral[fantasmaBlinha][fantasmaBcoluna+1] == PACMAN) ||
-                   (jogo.mapas.mapaGeral[fantasmaBlinha][fantasmaBcoluna-1] == PACMAN_MODIFICADO)) && (jogada == 'a'))) {
+                   (jogo.mapas.mapaGeral[fantasmaBlinha][fantasmaBcoluna-1] == PACMAN_MODIFICADO)) && (jogada == ESQUERDA))) {
             jogo.pacMan.vida = 0;
             jogo.pacMan.colidiuFantasma[i] = 1; 
         }
-        jogo.fantasmas = ExecutaMovimentoFantasma(jogo.fantasmas, fantasmaDoCaso);
+        jogo.fantasmas = ExecutaMovimentoFantasma(jogo.fantasmas, fantasmaDoCaso);            //se nao for nenhum dos casos acima, como por exemplo o fantasma encontrar uma comida, ele anda normalmente;
         jogo.mapas = LimpaCaminhoFantasmas(jogo.mapas, jogo.fantasmas, fantasmaDoCaso);
     }
 
-    if (jogo.fantasmas.fantasmaC.existe == 1) {                                               //verifica se o fantasma C existe;
+    if (jogo.fantasmas.fantasmaC.existe == 1) {                                               
         fantasmaDoCaso = FANTASMA_DIREITA;                                                               
         if (((jogo.fantasmas.fantasmaC.sentido == SENTIDO_ESQUERDA) && 
             ((jogo.mapas.mapaGeral[fantasmaClinha][fantasmaCcoluna-1] == PACMAN) ||
-            (jogo.mapas.mapaGeral[fantasmaClinha][fantasmaCcoluna-1] == PACMAN_MODIFICADO)) && (jogada == 'd'))) {
+            (jogo.mapas.mapaGeral[fantasmaClinha][fantasmaCcoluna-1] == PACMAN_MODIFICADO)) && (jogada == DIREITA))) {
             jogo.pacMan.vida = 0;
             jogo.pacMan.colidiuFantasma[i] = 1;
         } else if ((jogo.fantasmas.fantasmaC.sentido == SENTIDO_DIREITA) &&
-                   (jogo.mapas.mapaGeral[fantasmaClinha][fantasmaCcoluna+1] == PACMAN) && (jogada == 'a')) {
+                   (jogo.mapas.mapaGeral[fantasmaClinha][fantasmaCcoluna+1] == PACMAN) && (jogada == ESQUERDA)) {
             jogo.pacMan.vida = 0;
             jogo.pacMan.colidiuFantasma[i] = 1;  
         }
@@ -572,15 +572,15 @@ tJogo MovimentaFantasmas(tJogo jogo, char jogada, int i) {                      
         jogo.mapas = LimpaCaminhoFantasmas(jogo.mapas, jogo.fantasmas, fantasmaDoCaso);    
     } 
 
-    if (jogo.fantasmas.fantasmaI.existe == 1) {                                               //verifica se o fantasma I existe;
+    if (jogo.fantasmas.fantasmaI.existe == 1) {                                         
         fantasmaDoCaso = FANTASMA_BAIXO;
         if (((jogo.fantasmas.fantasmaI.sentido == SENTIDO_BAIXO) && 
             ((jogo.mapas.mapaGeral[fantasmaIlinha+1][fantasmaIcoluna] == PACMAN) ||
-            (jogo.mapas.mapaGeral[fantasmaIlinha+1][fantasmaIcoluna] == PACMAN_MODIFICADO)) && (jogada == 'w'))) {
+            (jogo.mapas.mapaGeral[fantasmaIlinha+1][fantasmaIcoluna] == PACMAN_MODIFICADO)) && (jogada == CIMA))) {
             jogo.pacMan.vida = 0;
             jogo.pacMan.colidiuFantasma[i] = 1;
         } else if ((jogo.fantasmas.fantasmaI.sentido == SENTIDO_CIMA) && 
-                   (jogo.mapas.mapaGeral[fantasmaIlinha-1][fantasmaIcoluna] == PACMAN) && (jogada == 's')) {
+                   (jogo.mapas.mapaGeral[fantasmaIlinha-1][fantasmaIcoluna] == PACMAN) && (jogada == BAIXO)) {
             jogo.pacMan.vida = 0;
             jogo.pacMan.colidiuFantasma[i] = 1;
         }
@@ -588,15 +588,15 @@ tJogo MovimentaFantasmas(tJogo jogo, char jogada, int i) {                      
         jogo.mapas = LimpaCaminhoFantasmas(jogo.mapas, jogo.fantasmas, fantasmaDoCaso);
     } 
 
-    if (jogo.fantasmas.fantasmaP.existe == 1) {                                               //verifica se o fantasma P existe;
+    if (jogo.fantasmas.fantasmaP.existe == 1) {                                               
         fantasmaDoCaso = FANTASMA_CIMA;
         if (((jogo.fantasmas.fantasmaP.sentido == SENTIDO_BAIXO) && 
             ((jogo.mapas.mapaGeral[fantasmaPlinha+1][fantasmaPcoluna] == PACMAN) ||
-            (jogo.mapas.mapaGeral[fantasmaPlinha+1][fantasmaPcoluna] == PACMAN_MODIFICADO)) && (jogada == 'w'))) {
+            (jogo.mapas.mapaGeral[fantasmaPlinha+1][fantasmaPcoluna] == PACMAN_MODIFICADO)) && (jogada == CIMA))) {
             jogo.pacMan.vida = 0;
             jogo.pacMan.colidiuFantasma[i] = 1;
         } else if ((jogo.fantasmas.fantasmaP.sentido == SENTIDO_CIMA) &&
-                   (jogo.mapas.mapaGeral[fantasmaPlinha-1][fantasmaPcoluna] == PACMAN) && (jogada == 's')) {
+                   (jogo.mapas.mapaGeral[fantasmaPlinha-1][fantasmaPcoluna] == PACMAN) && (jogada == BAIXO)) {
             jogo.pacMan.vida = 0;
             jogo.pacMan.colidiuFantasma[i] = 1;
         }
@@ -607,32 +607,32 @@ tJogo MovimentaFantasmas(tJogo jogo, char jogada, int i) {                      
     return jogo;
 }
 
-tFantasmas ExecutaMovimentoFantasma (tFantasmas fantasmas, char fantasmaDoCaso) {   
+tFantasmas ExecutaMovimentoFantasma (tFantasmas fantasmas, char fantasmaDoCaso) {       //executa o movimento do fantasma especifico;
     int fantasmaBcoluna = fantasmas.fantasmaB.posicaoFantasma.coluna;   int fantasmaCcoluna = fantasmas.fantasmaC.posicaoFantasma.coluna;
     int fantasmaIlinha = fantasmas.fantasmaI.posicaoFantasma.linha;     int fantasmaPlinha = fantasmas.fantasmaP.posicaoFantasma.linha;
 
-    if (fantasmaDoCaso == FANTASMA_ESQUERDA) {                          
-        if (fantasmas.fantasmaB.sentido == SENTIDO_ESQUERDA) {                                                                    
+    if (fantasmaDoCaso == FANTASMA_ESQUERDA) {                                          //se estiver se referindo ao fantasma B...
+        if (fantasmas.fantasmaB.sentido == SENTIDO_ESQUERDA) {                          //verifica o sentido do fantasma e muda a coluna/linha em que o fantasma se encontra;                                          
             fantasmas.fantasmaB.posicaoFantasma.coluna = fantasmaBcoluna-1;
         } else if (fantasmas.fantasmaB.sentido == SENTIDO_DIREITA) {
             fantasmas.fantasmaB.posicaoFantasma.coluna = fantasmaBcoluna+1;
         }
     } 
-    else if (fantasmaDoCaso == FANTASMA_DIREITA) {                
-        if (fantasmas.fantasmaC.sentido == SENTIDO_ESQUERDA) {                                                                  
+    else if (fantasmaDoCaso == FANTASMA_DIREITA) {                                      //se estiver se referindo ao fantasma C...
+        if (fantasmas.fantasmaC.sentido == SENTIDO_ESQUERDA) {
             fantasmas.fantasmaC.posicaoFantasma.coluna = fantasmaCcoluna-1;
         }  else if (fantasmas.fantasmaC.sentido == SENTIDO_DIREITA) {
             fantasmas.fantasmaC.posicaoFantasma.coluna = fantasmaCcoluna+1;
         }
     }
-    else if (fantasmaDoCaso == FANTASMA_BAIXO) {                                                                               
+    else if (fantasmaDoCaso == FANTASMA_BAIXO) {                                        //se estiver se referindo ao fantasma I...                                                                 
         if (fantasmas.fantasmaI.sentido == SENTIDO_BAIXO) {                                                                    
             fantasmas.fantasmaI.posicaoFantasma.linha = fantasmaIlinha+1;
         } else if (fantasmas.fantasmaI.sentido == SENTIDO_CIMA) {
             fantasmas.fantasmaI.posicaoFantasma.linha = fantasmaIlinha-1;
         }
     }
-    else if (fantasmaDoCaso == FANTASMA_CIMA) {                  
+    else if (fantasmaDoCaso == FANTASMA_CIMA) {                                         //se estiver se referindo ao fantasma P...
         if (fantasmas.fantasmaP.sentido == SENTIDO_BAIXO) {                                    
             fantasmas.fantasmaP.posicaoFantasma.linha =  fantasmaPlinha+1;
         } else if (fantasmas.fantasmaP.sentido == SENTIDO_CIMA) {
@@ -643,26 +643,26 @@ tFantasmas ExecutaMovimentoFantasma (tFantasmas fantasmas, char fantasmaDoCaso) 
     return fantasmas;
 }
 
-tMapa LimpaCaminhoFantasmas(tMapa mapas, tFantasmas fantasmas, char fantasmaDoCaso) {
+tMapa LimpaCaminhoFantasmas(tMapa mapas, tFantasmas fantasmas, char fantasmaDoCaso) {        //limpa o caminho que o fantasma passou
     int fantasmaBlinha = fantasmas.fantasmaB.posicaoFantasma.linha;      int fantasmaIlinha = fantasmas.fantasmaI.posicaoFantasma.linha; 
     int fantasmaBcoluna = fantasmas.fantasmaB.posicaoFantasma.coluna;    int fantasmaIcoluna = fantasmas.fantasmaI.posicaoFantasma.coluna;
     int fantasmaClinha = fantasmas.fantasmaC.posicaoFantasma.linha;      int fantasmaPlinha = fantasmas.fantasmaP.posicaoFantasma.linha;  
     int fantasmaCcoluna = fantasmas.fantasmaC.posicaoFantasma.coluna;    int fantasmaPcoluna = fantasmas.fantasmaP.posicaoFantasma.coluna;
 
-    if (fantasmaDoCaso == FANTASMA_ESQUERDA) {    
-        if (fantasmas.fantasmaB.sentido == SENTIDO_ESQUERDA) {
-            if (mapas.mapaComidas[fantasmaBlinha][fantasmaBcoluna+1] == COMIDA) {
+    if (fantasmaDoCaso == FANTASMA_ESQUERDA) {                                                  //se estiver se referindo ao fantasma B...
+        if (fantasmas.fantasmaB.sentido == SENTIDO_ESQUERDA) {                                  //verifica o sentido do fantasma;
+            if (mapas.mapaComidas[fantasmaBlinha][fantasmaBcoluna+1] == COMIDA) {               //verifica se a posicao em que o fantasma estava tinha uma comida no mapa de comidas;
                 mapas.mapaGeral[fantasmaBlinha][fantasmaBcoluna+1] = COMIDA;
-            } else if (mapas.mapaTeleportes[fantasmaBlinha][fantasmaBcoluna+1] ==  TELEPORTE) {
+            } else if (mapas.mapaTeleportes[fantasmaBlinha][fantasmaBcoluna+1] ==  TELEPORTE) {              //verifica se a posicao em que o fantasma estava tinha um teleporte no mapa de teleportes; 
                 mapas.mapaGeral[fantasmaBlinha][fantasmaBcoluna+1] = TELEPORTE;
-            } else if (mapas.mapaComidaEspecial[fantasmaBlinha][fantasmaBcoluna+1] == COMIDA_ESPECIAL) {
+            } else if (mapas.mapaComidaEspecial[fantasmaBlinha][fantasmaBcoluna+1] == COMIDA_ESPECIAL) {     //verifica se a posicao em que o fantasma estava tinha uma comida especial;
                 mapas.mapaGeral[fantasmaBlinha][fantasmaBcoluna+1] = COMIDA_ESPECIAL; 
-            } else if (mapas.mapaComidaMod[fantasmaBlinha][fantasmaBcoluna+1] == COMIDA_MOD_PACMAN) {
+            } else if (mapas.mapaComidaMod[fantasmaBlinha][fantasmaBcoluna+1] == COMIDA_MOD_PACMAN) {        //verifica se a posicao em que o fantasma estava tinha uma comida que modifica o pacman;
                 mapas.mapaGeral[fantasmaBlinha][fantasmaBcoluna+1] = COMIDA_MOD_PACMAN; 
             } else {
-                mapas.mapaGeral[fantasmaBlinha][fantasmaBcoluna+1] = VAZIO;
+                mapas.mapaGeral[fantasmaBlinha][fantasmaBcoluna+1] = VAZIO;                     //se eh nenhum dos casos acima, entao a posicao em que o fantasma estava fica vazia;
             }
-        } else if (fantasmas.fantasmaB.sentido == SENTIDO_DIREITA) {
+        } else if (fantasmas.fantasmaB.sentido == SENTIDO_DIREITA) {                        
             if (mapas.mapaComidas[fantasmaBlinha][fantasmaBcoluna-1] == COMIDA) {
                 mapas.mapaGeral[fantasmaBlinha][fantasmaBcoluna-1] = COMIDA;
             } else if (mapas.mapaTeleportes[fantasmaBlinha][fantasmaBcoluna-1] == TELEPORTE) {
@@ -761,54 +761,59 @@ tMapa LimpaCaminhoFantasmas(tMapa mapas, tFantasmas fantasmas, char fantasmaDoCa
     return mapas;
 }
 
-tJogo MovimentaPacman(tJogo jogo, char jogada, int i) {                          //com base na jogada inserida, determina o movimento do pacMan;
+tJogo MovimentaPacman(tJogo jogo, char jogada, int i) {               //com base na jogada inserida, determina o movimento do pacMan;
     int pacManLinha = jogo.pacMan.posicaoPacMan.linha;
     int pacManColuna = jogo.pacMan.posicaoPacMan.coluna;
 
-    if (jogada == 'w') {                                                                                                //se a jogada for para cima...
-        if (jogo.mapas.mapaGeral[pacManLinha-1][pacManColuna] == COMIDA) {         
-            jogo.mapas = PacManComeu(jogo.mapas, jogo.pacMan, jogada);                                                                          
-            jogo.pacMan.pegouComida[i] = 1;                                                                                   
-            jogo.movimentos.movimentoW.comeu++;
-            jogo.qtdComidas--;  
-            jogo.pacMan.pontuacao++;                                                                                       
-        } else if (jogo.mapas.mapaGeral[pacManLinha-1][pacManColuna] == COMIDA_ESPECIAL) {
-            jogo.mapas = PacManComeuEspecial(jogo.mapas, jogo.pacMan, jogada);
-            jogo.pacMan.pontuacao+=5;
-        } else if (jogo.mapas.mapaGeral[pacManLinha-1][pacManColuna] == COMIDA_MOD_PACMAN) {
-            jogo.mapas = PacManComeuMod(jogo.mapas, jogo.pacMan, jogada);
-            jogo.pacMan.pegouMod = 1;
-        }else if (jogo.mapas.mapaGeral[pacManLinha-1][pacManColuna] == TELEPORTE) {
-            jogo = PacManTeletransportou(jogo, jogada, i);                                                                   
-            jogo.mapas = LimpaCaminhoPacManTeletransporte(jogo.mapas, jogo.pacMan, jogo.teleporte, jogada);                                          
-            jogo.pacMan.usouTeleporte[i] = 1;                                                                              
-        } else if (jogo.mapas.mapaGeral[pacManLinha-1][pacManColuna] == PAREDE) {       
-            if (jogo.mapas.mapaTeleportes[pacManLinha][pacManColuna] == TELEPORTE) {
-                jogo = PacManEmCimaDoTeleporte(jogo, i);                                                                  
-                jogo.pacMan.usouTeleporte[i] = 1;                                                                            
-            }
-            jogo.pacMan.colidiuParede[i] = 1;                                                                                
-            jogo.movimentos.movimentoW.bateu++;                                                                               
-        } else if ((jogo.mapas.mapaGeral[pacManLinha-1][pacManColuna] == FANTASMA_ESQUERDA)
+    if (jogada == CIMA) {                                              //se a jogada for para cima...
+        if (jogo.mapas.mapaGeral[pacManLinha-1][pacManColuna] == COMIDA) {         //verifica se na posicao em que o pacman vai tem uma comida no mapa geral;
+            jogo.mapas = PacManComeu(jogo.mapas, jogo.pacMan, jogada);             //chama a funcao que notifica que o pacman comeu;                                                             
+            jogo.pacMan.pegouComida[i] = 1;                                        //retorna no vetor que o pacman comeu uma comida;                                           
+            jogo.movimentos.movimentoW.comeu++;                                    //aumenta o numero de comidas que esse tipo de jogada consumiu;
+            jogo.qtdComidas--;                                                     //diminui o numro de comidas que tem no jogo;
+            jogo.pacMan.pontuacao++;                                               //aumenta a pontuacao do jogador;    
+
+        } else if (jogo.mapas.mapaGeral[pacManLinha-1][pacManColuna] == COMIDA_ESPECIAL) {      //verifica se na posicao em que o pacman vai tem uma comida especial no mapa geral;
+            jogo.mapas = PacManComeuEspecial(jogo.mapas, jogo.pacMan, jogada);                  //chama a funcao que notifica que o pacman comeu uma comida especial;    
+            jogo.pacMan.pontuacao+=5;                                                           //aumenta 5 pontos na pontuacao do jogador;
+
+        } else if (jogo.mapas.mapaGeral[pacManLinha-1][pacManColuna] == COMIDA_MOD_PACMAN) {       //verifica se na posicao em que o pacman vai tem uma comida que modifica o pacman; 
+            jogo.mapas = PacManComeuMod(jogo.mapas, jogo.pacMan, jogada);                          //chama a funcao que notifica que o pacman comeu uma comida que modifica o pacman;
+            jogo.pacMan.pegouMod = 1;                                                              //retorna no verificador que o pacman comeu a commida que modifica o pacman;
+
+        }else if (jogo.mapas.mapaGeral[pacManLinha-1][pacManColuna] == TELEPORTE) {                           //verifica se na posicao em que o pacman vai tem um teleporte;  
+            jogo = PacManTeletransportou(jogo, jogada, i);                                                    //chama a funcao que notifica que o pacman usou o teleporte;
+            jogo.mapas = LimpaCaminhoPacManTeletransporte(jogo.mapas, jogo.pacMan, jogo.teleporte, jogada);   //limpa o caminho do pacman apos ele usar o teleporte;                                       
+            jogo.pacMan.usouTeleporte[i] = 1;                                                                 //retorna no vetor que o pacman usou teleporte;          
+
+        } else if (jogo.mapas.mapaGeral[pacManLinha-1][pacManColuna] == PAREDE) {                  //verifica se na posicao em que o pacman vai tem uma parede;
+            if (jogo.mapas.mapaTeleportes[pacManLinha][pacManColuna] == TELEPORTE) {               //verifica se na posicao atual do pacman tem um teleporte;
+                jogo = PacManEmCimaDoTeleporte(jogo, i);                                           //chama a funcao que notifica que o pacman estava em cima do teleporte ja;                       
+                jogo.pacMan.usouTeleporte[i] = 1;                                                  //retorna no vetor que o pacman usou teleporte;                          
+            }   
+            jogo.pacMan.colidiuParede[i] = 1;                                                      //retorna no vertor que o pacman colidiu com uma parede;                          
+            jogo.movimentos.movimentoW.bateu++;                                                    //aumenta o numero de colisoes com a parede que esse tipo de jogada fez;  
+
+        } else if ((jogo.mapas.mapaGeral[pacManLinha-1][pacManColuna] == FANTASMA_ESQUERDA)            //verifica se na posicao em que o pacman vai tem um fantasma;
                 || (jogo.mapas.mapaGeral[pacManLinha-1][pacManColuna] == FANTASMA_DIREITA)
                 || (jogo.mapas.mapaGeral[pacManLinha-1][pacManColuna] == FANTASMA_BAIXO)
                 || (jogo.mapas.mapaGeral[pacManLinha-1][pacManColuna] == FANTASMA_CIMA)) {         
-            jogo.pacMan.vida=0;                                                                                               //retorna que o pacMan morreu;
-            jogo.pacMan.colidiuFantasma[i] = 1;                                                                               //retorna que o pacMan colidiu com um fantasma;
-            jogo.mapas = LimpaCaminhoPacMan(jogo.mapas, jogo.pacMan, jogada);                                                                          //limpa o rastro do pacMan;
+            jogo.pacMan.vida=0;                                                                        //retorna que o pacMan morreu;
+            jogo.pacMan.colidiuFantasma[i] = 1;                                                        //retorna que o pacMan colidiu com um fantasma;
+            jogo.mapas = LimpaCaminhoPacMan(jogo.mapas, jogo.pacMan, jogada);                          //limpa o rastro do pacMan apos morrer;
         }
 
-        if ((jogo.pacMan.colidiuParede[i] != 1) && (jogo.pacMan.usouTeleporte[i] != 1) && (jogo.pacMan.vida != 0)) {          //se o pacMan nao bateu em uma parede, nao usou teleporte e coninua vivo...
-            jogo.pacMan.posicaoPacMan = ExecutaMovimentoPacMan(jogo.pacMan.posicaoPacMan, jogada);                                           //chama a funcao que executa o movimento do pacMan;   
-            jogo.mapas = LimpaCaminhoPacMan(jogo.mapas, jogo.pacMan, jogada);                                                                          //limpa o rastro do pacMan; 
+        if ((jogo.pacMan.colidiuParede[i] != 1) && (jogo.pacMan.usouTeleporte[i] != 1) && (jogo.pacMan.vida != 0)) {       //se o pacMan nao bateu em uma parede, nao usou teleporte e coninua vivo...
+            jogo.pacMan.posicaoPacMan = ExecutaMovimentoPacMan(jogo.pacMan.posicaoPacMan, jogada);                         //chama a funcao que executa o movimento do pacMan;   
+            jogo.mapas = LimpaCaminhoPacMan(jogo.mapas, jogo.pacMan, jogada);                                              //limpa o rastro do pacMan; 
         }
-        if (jogo.pacMan.vida == 1) {                                                                                          //se o pacMan ainda esta vivo...
-            jogo.mapas.trilha[jogo.pacMan.posicaoPacMan.linha][jogo.pacMan.posicaoPacMan.coluna] = i;                         //adiciona o numero da jogada ao mapa da trilha na posicao em que o pacMan se encontra depois de mover;       
+        if (jogo.pacMan.vida == 1) {                                                                            //se o pacMan ainda esta vivo...
+            jogo.mapas.trilha[jogo.pacMan.posicaoPacMan.linha][jogo.pacMan.posicaoPacMan.coluna] = i;           //adiciona o numero da jogada ao mapa da trilha na posicao em que o pacMan se encontra depois de mover;       
         }
         
     } 
     
-    else if (jogada == 's') {
+    else if (jogada == BAIXO) {
         if (jogo.mapas.mapaGeral[pacManLinha+1][pacManColuna] == COMIDA) {   
             jogo.mapas = PacManComeu(jogo.mapas, jogo.pacMan, jogada);
             jogo.pacMan.pegouComida[i] = 1;   
@@ -850,7 +855,7 @@ tJogo MovimentaPacman(tJogo jogo, char jogada, int i) {                         
         }
     }
     
-    else if (jogada == 'a') {                                                                               
+    else if (jogada == ESQUERDA) {                                                                               
         if (jogo.mapas.mapaGeral[pacManLinha][pacManColuna-1] == COMIDA) {                
             jogo.mapas = PacManComeu(jogo.mapas, jogo.pacMan, jogada);  
             jogo.pacMan.pegouComida[i] = 1;   
@@ -892,7 +897,7 @@ tJogo MovimentaPacman(tJogo jogo, char jogada, int i) {                         
         }
     } 
     
-    else if (jogada == 'd') {                                                                          
+    else if (jogada == DIREITA) {                                                                          
         if (jogo.mapas.mapaGeral[pacManLinha][pacManColuna+1] == COMIDA) {              
             jogo.mapas = PacManComeu(jogo.mapas, jogo.pacMan, jogada);
             jogo.pacMan.pegouComida[i] = 1; 
@@ -937,26 +942,26 @@ tJogo MovimentaPacman(tJogo jogo, char jogada, int i) {                         
     return jogo;
 }
 
-tMapa PacManComeu(tMapa mapas, tPacMan pacMan, char jogada) {                                         //limpa a posicao da comida que o pacMan vai consumir do mapa geral e do mapa de comida;
+tMapa PacManComeu(tMapa mapas, tPacMan pacMan, char jogada) {                  //funcao que limpa a posicao da comida que o pacMan vai consumir do mapa geral e do mapa de comida;
     int pacManLinha = pacMan.posicaoPacMan.linha;
     int pacManColuna = pacMan.posicaoPacMan.coluna;
     
-    if (jogada == 'w') {                                                              //se a jogada foi para cima...
-        mapas.mapaComidas[pacManLinha-1][pacManColuna] = VAZIO;
+    if (jogada == CIMA) {                                                       //se a jogada foi para cima...
+        mapas.mapaComidas[pacManLinha-1][pacManColuna] = VAZIO;                //limpa o mapa geral e o mapa de comidas colocando caractere vazio ao inves do *
         mapas.mapaGeral[pacManLinha-1][pacManColuna] = VAZIO;                                        
     } 
     
-    else if (jogada == 's') {                                                          //se a jogada for para baixo...
+    else if (jogada == BAIXO) {                                                  //se a jogada for para baixo...
         mapas.mapaComidas[pacManLinha+1][pacManColuna] = VAZIO;
         mapas.mapaGeral[pacManLinha+1][pacManColuna] = VAZIO;
     } 
     
-    else if (jogada == 'a') {                                                        //se a jogada for para a esquerda...
+    else if (jogada == ESQUERDA) {                                                  //se a jogada for para a esquerda...
         mapas.mapaComidas[pacManLinha][pacManColuna-1] = VAZIO;
         mapas.mapaGeral[pacManLinha][pacManColuna-1] = VAZIO;
     } 
     
-    else if (jogada == 'd') {                                                         //se a jogada for para a direita...
+    else if (jogada == DIREITA) {                                                  //se a jogada for para a direita...
         mapas.mapaComidas[pacManLinha][pacManColuna+1] = VAZIO;
         mapas.mapaGeral[pacManLinha][pacManColuna+1] = VAZIO;
     }
@@ -964,26 +969,26 @@ tMapa PacManComeu(tMapa mapas, tPacMan pacMan, char jogada) {                   
     return mapas;
 }
 
-tMapa PacManComeuEspecial(tMapa mapas, tPacMan pacMan, char jogada) {
+tMapa PacManComeuEspecial(tMapa mapas, tPacMan pacMan, char jogada) {           //funcao que limpa a posicao da comida especial que o pacMan vai consumir do mapa geral e do mapa de comidas especiais;
     int pacManLinha = pacMan.posicaoPacMan.linha;
     int pacManColuna = pacMan.posicaoPacMan.coluna;
     
-    if (jogada == 'w') {                                                              //se a jogada foi para cima...
-        mapas.mapaComidaEspecial[pacManLinha-1][pacManColuna] = VAZIO;
+    if (jogada == CIMA) {                                                        //se a jogada foi para cima...
+        mapas.mapaComidaEspecial[pacManLinha-1][pacManColuna] = VAZIO;          //limpa o mapa geral e o mapa de comidas especiais colocando caractere vazio ao inves do %
         mapas.mapaGeral[pacManLinha-1][pacManColuna] = VAZIO;                                        
     } 
     
-    else if (jogada == 's') {                                                          //se a jogada for para baixo...
+    else if (jogada == BAIXO) {                                                   //se a jogada for para baixo...
         mapas.mapaComidaEspecial[pacManLinha+1][pacManColuna] = VAZIO;
         mapas.mapaGeral[pacManLinha+1][pacManColuna] = VAZIO;
     } 
     
-    else if (jogada == 'a') {                                                        //se a jogada for para a esquerda...
+    else if (jogada == ESQUERDA) {                                                   //se a jogada for para a esquerda...
         mapas.mapaComidaEspecial[pacManLinha][pacManColuna-1] = VAZIO;
         mapas.mapaGeral[pacManLinha][pacManColuna-1] = VAZIO;
     } 
     
-    else if (jogada == 'd') {                                                         //se a jogada for para a direita...
+    else if (jogada == DIREITA) {                                                   //se a jogada for para a direita...
         mapas.mapaComidaEspecial[pacManLinha][pacManColuna+1] = VAZIO;
         mapas.mapaGeral[pacManLinha][pacManColuna+1] = VAZIO;
     }
@@ -991,26 +996,26 @@ tMapa PacManComeuEspecial(tMapa mapas, tPacMan pacMan, char jogada) {
     return mapas;
 }
 
-tMapa PacManComeuMod(tMapa mapas, tPacMan pacMan, char jogada) {
+tMapa PacManComeuMod(tMapa mapas, tPacMan pacMan, char jogada) {                //funcao que limpa a posicao da comida que modifica o pacman, que ele vai consumir do mapa geral e do mapa de comidas que modificam;
     int pacManLinha = pacMan.posicaoPacMan.linha;
     int pacManColuna = pacMan.posicaoPacMan.coluna;
     
-    if (jogada == 'w') {                                                              //se a jogada foi para cima...
-        mapas.mapaComidaMod[pacManLinha-1][pacManColuna] = VAZIO;
+    if (jogada == CIMA) {                                                        //se a jogada foi para cima...
+        mapas.mapaComidaMod[pacManLinha-1][pacManColuna] = VAZIO;               //limpa o mapa geral e o mapa de comidas especiais colocando caractere vazio ao inves do !
         mapas.mapaGeral[pacManLinha-1][pacManColuna] = VAZIO;                                        
     } 
     
-    else if (jogada == 's') {                                                          //se a jogada for para baixo...
+    else if (jogada == BAIXO) {                                                   //se a jogada for para baixo...
         mapas.mapaComidaMod[pacManLinha+1][pacManColuna] = VAZIO;
         mapas.mapaGeral[pacManLinha+1][pacManColuna] = VAZIO;
     } 
     
-    else if (jogada == 'a') {                                                        //se a jogada for para a esquerda...
+    else if (jogada == ESQUERDA) {                                                   //se a jogada for para a esquerda...
         mapas.mapaComidaMod[pacManLinha][pacManColuna-1] = VAZIO;
         mapas.mapaGeral[pacManLinha][pacManColuna-1] = VAZIO;
     } 
     
-    else if (jogada == 'd') {                                                         //se a jogada for para a direita...
+    else if (jogada == DIREITA) {                                                   //se a jogada for para a direita...
         mapas.mapaComidaMod[pacManLinha][pacManColuna+1] = VAZIO;
         mapas.mapaGeral[pacManLinha][pacManColuna+1] = VAZIO;
     }
@@ -1018,23 +1023,24 @@ tMapa PacManComeuMod(tMapa mapas, tPacMan pacMan, char jogada) {
     return mapas;
 }
 
-tJogo PacManTeletransportou(tJogo jogo, char jogada, int i) {
+tJogo PacManTeletransportou(tJogo jogo, char jogada, int i) {              //funcao que o pacman teletransporta;
     int pacManLinha = jogo.pacMan.posicaoPacMan.linha;               int pacManColuna = jogo.pacMan.posicaoPacMan.coluna;
     int teleporte1linha = jogo.teleporte.posicaoTeleporte1.linha;    int teleporte1coluna = jogo.teleporte.posicaoTeleporte1.coluna;
     int teleporte2linha = jogo.teleporte.posicaoTeleporte2.linha;    int teleporte2coluna = jogo.teleporte.posicaoTeleporte2.coluna;  
 
-    if (jogada == 'w') {
-        if ((pacManLinha-1 == teleporte1linha) && (pacManColuna == teleporte1coluna)) {
-            jogo.pacMan.posicaoPacMan.linha = teleporte2linha ;
+    if (jogada == CIMA) {                                                                     //se a jogada eh para cima...
+        if ((pacManLinha-1 == teleporte1linha) && (pacManColuna == teleporte1coluna)) {          //verifica se a posicao que o pacman vai tem o primeiro teleporte;
+            jogo.pacMan.posicaoPacMan.linha = teleporte2linha;                                   //atualiza a posicao do pacman como sendo a posicao do segundo teleporte;
             jogo.pacMan.posicaoPacMan.coluna = teleporte2coluna;
-            jogo.mapas.trilha[teleporte1linha][teleporte1coluna] = i;
-        } else if ((pacManLinha-1 == teleporte2linha) && (pacManColuna == teleporte2coluna)) {
-            jogo.pacMan.posicaoPacMan.linha = teleporte1linha;
-            jogo.pacMan.posicaoPacMan.coluna = teleporte1coluna;
-            jogo.mapas.trilha[teleporte2linha][teleporte2coluna] = i;
+            jogo.mapas.trilha[teleporte1linha][teleporte1coluna] = i;                            //atualiza no mapa da trilha que, na posicao do teleporte 1, o pacman usou o teleporte na jogada i;
+
+        } else if ((pacManLinha-1 == teleporte2linha) && (pacManColuna == teleporte2coluna)) {   //verifica se a posicao que o pacman vai tem o segundo teleporte;
+            jogo.pacMan.posicaoPacMan.linha = teleporte1linha;                                   //atualiza a posicao do pacman como sendo a posicao do primeiro teleporte;
+            jogo.pacMan.posicaoPacMan.coluna = teleporte1coluna;                              
+            jogo.mapas.trilha[teleporte2linha][teleporte2coluna] = i;                            //atualiza no mapa da trilha que, na posicao do teleporte 2, o pacman usou o teleporte na jogada i;
         }
     }
-    else if (jogada == 's') {
+    else if (jogada == BAIXO) {                                                               //se a jogada eh para baixo...
         if ((pacManLinha+1 == teleporte1linha) && (pacManColuna == teleporte1coluna)) {
             jogo.pacMan.posicaoPacMan.linha = teleporte2linha;
             jogo.pacMan.posicaoPacMan.coluna = teleporte2coluna;
@@ -1045,7 +1051,7 @@ tJogo PacManTeletransportou(tJogo jogo, char jogada, int i) {
             jogo.mapas.trilha[teleporte2linha][teleporte2coluna] = i;
         }
     }
-    else if (jogada == 'a') {
+    else if (jogada == ESQUERDA) {                                                            //se a jogada eh para a esquerda...                                                               
         if ((pacManLinha == teleporte1linha) && (pacManColuna-1 == teleporte1coluna)) {
             jogo.pacMan.posicaoPacMan.linha = teleporte2linha;
             jogo.pacMan.posicaoPacMan.coluna = teleporte2coluna;
@@ -1056,7 +1062,7 @@ tJogo PacManTeletransportou(tJogo jogo, char jogada, int i) {
             jogo.mapas.trilha[teleporte2linha][teleporte2coluna] = i;
         }
     }
-    else if (jogada == 'd') {
+    else if (jogada == DIREITA) {                                                             //se a jogada eh para a direita...
         if ((pacManLinha == teleporte1linha) && (pacManColuna+1 == teleporte1coluna)) {
             jogo.pacMan.posicaoPacMan.linha = teleporte2linha;
             jogo.pacMan.posicaoPacMan.coluna = teleporte2coluna;
@@ -1071,74 +1077,75 @@ tJogo PacManTeletransportou(tJogo jogo, char jogada, int i) {
     return jogo;
 }
 
-tJogo PacManEmCimaDoTeleporte(tJogo jogo, int i) {
+tJogo PacManEmCimaDoTeleporte(tJogo jogo, int i) {                      //funcao que o pacman ja estava em cima do teleporte;
     int pacManLinha = jogo.pacMan.posicaoPacMan.linha;               int pacManColuna = jogo.pacMan.posicaoPacMan.coluna;
     int teleporte1linha = jogo.teleporte.posicaoTeleporte1.linha;    int teleporte1coluna = jogo.teleporte.posicaoTeleporte1.coluna;
     int teleporte2linha = jogo.teleporte.posicaoTeleporte2.linha;    int teleporte2coluna = jogo.teleporte.posicaoTeleporte2.coluna; 
 
-    if ((pacManLinha == teleporte1linha) && (pacManColuna == teleporte1coluna)) {
-        jogo.pacMan.posicaoPacMan.linha = teleporte2linha;
+    if ((pacManLinha == teleporte1linha) && (pacManColuna == teleporte1coluna)) {          //se o pacman esta na posicao do primeiro teleporte...
+        jogo.pacMan.posicaoPacMan.linha = teleporte2linha;                                 //atualiza a posicao do pacman para a posicao do segundo teleporte;
         jogo.pacMan.posicaoPacMan.coluna = teleporte2coluna;
-        jogo.mapas.mapaGeral[teleporte1linha][teleporte1coluna] = TELEPORTE;
-        jogo.mapas.trilha[teleporte1linha][teleporte1coluna] = i; 
-    } else if ((pacManLinha == teleporte2linha) && (pacManColuna == teleporte2coluna)) {
-        jogo.pacMan.posicaoPacMan.linha = teleporte1linha;
+        jogo.mapas.mapaGeral[teleporte1linha][teleporte1coluna] = TELEPORTE;               //atualiza o mapa geral de que na posicao em que o pacman acabou de sair tem o primeiro teleporte;
+        jogo.mapas.trilha[teleporte1linha][teleporte1coluna] = i;                          //retorna pro mapa de trilha que o pacman usou o teleporte na jogada i;
+
+    } else if ((pacManLinha == teleporte2linha) && (pacManColuna == teleporte2coluna)) {   //se o pacman esta na posicao do segundo teleporte...
+        jogo.pacMan.posicaoPacMan.linha = teleporte1linha;                                 //atualiza a posicao do pacman para a posicao do primeiro teleporte;
         jogo.pacMan.posicaoPacMan.coluna = teleporte1coluna;
-        jogo.mapas.mapaGeral[teleporte2linha][teleporte2coluna] = TELEPORTE;
-        jogo.mapas.trilha[teleporte2linha][teleporte2coluna] = i;
+        jogo.mapas.mapaGeral[teleporte2linha][teleporte2coluna] = TELEPORTE;               //atualiza o mapa geral de que na posicao em que o pacman acabou de sair tem o segundo teleporte;
+        jogo.mapas.trilha[teleporte2linha][teleporte2coluna] = i;                          //retorna pro mapa de trilha que o pacman usou o teleporte na jogada i; 
     }
 
     return jogo;
 }
 
-tPosicao ExecutaMovimentoPacMan(tPosicao posicaoPacMan, char jogada) {                //a partir da jogada lida, determina a nova posicao do pacMan no mapa;
+tPosicao ExecutaMovimentoPacMan(tPosicao posicaoPacMan, char jogada) {         //a partir da jogada lida, determina a nova posicao do pacMan no mapa;
 
-    if (jogada == 'w') {                                                      //se a jogada for para cima...
+    if (jogada == CIMA) {                                                       //se a jogada for para cima...
         posicaoPacMan.linha = posicaoPacMan.linha-1;
-    } else if (jogada == 's') {                                               //se a jogada for para baixo...
+    } else if (jogada == BAIXO) {                                                //se a jogada for para baixo...
         posicaoPacMan.linha = posicaoPacMan.linha+1;
-    } else if (jogada == 'a') {                                               //se a jogada por para a esquerda...
+    } else if (jogada == ESQUERDA) {                                                //se a jogada por para a esquerda...
         posicaoPacMan.coluna = posicaoPacMan.coluna-1;
-    } else if (jogada == 'd') {                                               //se a jogada for para a direita...
+    } else if (jogada == DIREITA) {                                                //se a jogada for para a direita...
         posicaoPacMan.coluna = posicaoPacMan.coluna+1;
     }
 
     return posicaoPacMan;
 }
 
-tMapa LimpaCaminhoPacMan(tMapa mapas, tPacMan pacMan, char jogada) {
+tMapa LimpaCaminhoPacMan(tMapa mapas, tPacMan pacMan, char jogada) {          //limpa o rastro do pacman;
     int pacManLinha = pacMan.posicaoPacMan.linha;   
     int pacManColuna = pacMan.posicaoPacMan.coluna;
 
-    if (pacMan.vida == 0) {
-        if (mapas.mapaTeleportes[pacManLinha][pacManColuna] == TELEPORTE) {
-            mapas.mapaGeral[pacManLinha][pacManColuna] = TELEPORTE;
-        } else {
+    if (pacMan.vida == 0) {                                                   //se o pacman estiver morto...
+        if (mapas.mapaTeleportes[pacManLinha][pacManColuna] == TELEPORTE) {        //verifica se nessa posicao que o pacman esta tem um teleporte no mapa de teleportes;
+            mapas.mapaGeral[pacManLinha][pacManColuna] = TELEPORTE;            
+        } else {                                                                   //se nao tiver um teleporte...
             mapas.mapaGeral[pacManLinha][pacManColuna] = VAZIO;
         }
-    } else {
-        if (jogada == 'w') {
-            if (mapas.mapaTeleportes[pacManLinha+1][pacManColuna] == TELEPORTE) {
+    } else {                                                                  //se o pacman estiver vivo...
+        if (jogada == CIMA) {                                                       //se a jogada foi para cima...
+            if (mapas.mapaTeleportes[pacManLinha+1][pacManColuna] == TELEPORTE) {    //verifica se a posicao que o pacman estava tinha um teleporte;
                 mapas.mapaGeral[pacManLinha+1][pacManColuna] = TELEPORTE;
-            } else {
+            } else {                                                                 //se nao tinha um teleporte...
                 mapas.mapaGeral[pacManLinha+1][pacManColuna] = VAZIO;
             }
         } 
-        else if (jogada == 's') {
-            if (mapas.mapaTeleportes[pacManLinha-1][pacManColuna] == TELEPORTE) {
+        else if (jogada == BAIXO) {                                                  //se a jogada foi para baixo...
+            if (mapas.mapaTeleportes[pacManLinha-1][pacManColuna] == TELEPORTE) {    
                 mapas.mapaGeral[pacManLinha-1][pacManColuna] = TELEPORTE;
             } else {
                 mapas.mapaGeral[pacManLinha-1][pacManColuna] = VAZIO;
             }
         }
-        else if (jogada == 'a') {
+        else if (jogada == ESQUERDA) {                                                  //se a jogada foi para a esquerda...
             if (mapas.mapaTeleportes[pacManLinha][pacManColuna+1] == TELEPORTE) {
                 mapas.mapaGeral[pacManLinha][pacManColuna+1] = TELEPORTE;
             } else {
                 mapas.mapaGeral[pacManLinha][pacManColuna+1] = VAZIO;
             }
         }
-        else if (jogada == 'd') {
+        else if (jogada == DIREITA) {                                                  //se a jogada foi para a direita...
             if (mapas.mapaTeleportes[pacManLinha][pacManColuna-1] == TELEPORTE) {
                 mapas.mapaGeral[pacManLinha][pacManColuna-1] = TELEPORTE;
             } else {
@@ -1150,33 +1157,33 @@ tMapa LimpaCaminhoPacMan(tMapa mapas, tPacMan pacMan, char jogada) {
     return mapas;
 }
 
-tMapa LimpaCaminhoPacManTeletransporte(tMapa mapas, tPacMan pacMan, tTeleportes teleporte, char jogada) {
+tMapa LimpaCaminhoPacManTeletransporte(tMapa mapas, tPacMan pacMan, tTeleportes teleporte, char jogada) {                   //funcao que limpa o rastro do pacman apos ele usar o teleporte;
     int pacManLinha = pacMan.posicaoPacMan.linha;               int pacManColuna = pacMan.posicaoPacMan.coluna;
     int teleporte1linha = teleporte.posicaoTeleporte1.linha;    int teleporte1coluna = teleporte.posicaoTeleporte1.coluna;
     int teleporte2linha = teleporte.posicaoTeleporte2.linha;    int teleporte2coluna = teleporte.posicaoTeleporte2.coluna;
 
-    if (jogada == 'w') {
-        if ((pacManLinha == teleporte2linha) && (pacManColuna == teleporte2coluna)) {
-            mapas.mapaGeral[teleporte1linha+1][teleporte1coluna] = VAZIO;
+    if (jogada == CIMA) {                                                                     //se a jogada foi para cima...
+        if ((pacManLinha == teleporte2linha) && (pacManColuna == teleporte2coluna)) {           //verifica se a posicao que o pacman foi com a jogada tinha o segundo teleporte;
+            mapas.mapaGeral[teleporte1linha+1][teleporte1coluna] = VAZIO;                       //se tinha, em baixo do primeiro teleporte tera um caractere vazio;
         }
-        else if ((pacManLinha == teleporte1linha) && (pacManColuna == teleporte1coluna)) {
-            mapas.mapaGeral[teleporte2linha+1][teleporte2coluna] = VAZIO;
+        else if ((pacManLinha == teleporte1linha) && (pacManColuna == teleporte1coluna)) {      //verifica se a posicao que o pacman foi com a jogada tinha o primeiro teleporte;
+            mapas.mapaGeral[teleporte2linha+1][teleporte2coluna] = VAZIO;                       //se tinha, em baixo do segundo teleporte tera um caractere vazio;
         }
-    } else if (jogada == 's') {
+    } else if (jogada == BAIXO) {                                                              //se a jogada foi para cima...
         if ((pacManLinha == teleporte2linha) && (pacManColuna == teleporte2coluna)) {
             mapas.mapaGeral[teleporte1linha-1][teleporte1coluna] = VAZIO;
         }
         else if ((pacManLinha == teleporte1linha) && (pacManColuna == teleporte1coluna)) {
             mapas.mapaGeral[teleporte2linha-1][teleporte2coluna] = VAZIO;
         }
-    } else if (jogada == 'a') {
+    } else if (jogada == ESQUERDA) {                                                              //se a jogada foi para a esquerda...
         if ((pacManLinha == teleporte2linha) && (pacManColuna == teleporte2coluna)) {
             mapas.mapaGeral[teleporte1linha][ teleporte1coluna+1] = VAZIO;
         }
         else if ((pacManLinha == teleporte1linha) && (pacManColuna == teleporte1coluna)) {
             mapas.mapaGeral[teleporte2linha][teleporte2coluna+1] = VAZIO;
         }
-    } else if (jogada == 'd') {
+    } else if (jogada == DIREITA) {                                                              //se a jogada foi para a direita...
         if ((pacManLinha == teleporte2linha) && (pacManColuna == teleporte2coluna)) {
             mapas.mapaGeral[teleporte1linha][teleporte1coluna-1] = VAZIO;
         }
@@ -1188,7 +1195,7 @@ tMapa LimpaCaminhoPacManTeletransporte(tMapa mapas, tPacMan pacMan, tTeleportes 
     return mapas;
 }
 
-tMapa AtualizaMapa(tMapa mapas, tPacMan pacMan, tFantasmas fantasmas, int linha, int coluna) {
+tMapa AtualizaMapa(tMapa mapas, tPacMan pacMan, tFantasmas fantasmas, int linha, int coluna) {          //atualiza o mapa geral;
     int fantasmaBlinha = fantasmas.fantasmaB.posicaoFantasma.linha;      int fantasmaIlinha = fantasmas.fantasmaI.posicaoFantasma.linha; 
     int fantasmaBcoluna = fantasmas.fantasmaB.posicaoFantasma.coluna;    int fantasmaIcoluna = fantasmas.fantasmaI.posicaoFantasma.coluna;
     int fantasmaClinha = fantasmas.fantasmaC.posicaoFantasma.linha;      int fantasmaPlinha = fantasmas.fantasmaP.posicaoFantasma.linha;  
@@ -1199,15 +1206,15 @@ tMapa AtualizaMapa(tMapa mapas, tPacMan pacMan, tFantasmas fantasmas, int linha,
 
     for (i=0; i<linha; i++) {
         for (j=0; j<coluna; j++) {
-            if ((pacMan.vida == 1) && (i == pacManLinha) && (j == pacManColuna)) {
-                    mapas.mapaGeral[i][j] = PACMAN;
-            } if ((fantasmas.fantasmaB.existe == 1) && (i == fantasmaBlinha) && (j == fantasmaBcoluna)) {
+            if ((pacMan.vida == 1) && (i == pacManLinha) && (j == pacManColuna)) {                         //se o pacman esta vivo e as variaveis i e j se encontram na posicao do pacman...
+                    mapas.mapaGeral[i][j] = PACMAN;                                                        //atualiza no mapa geral com o caractere do pacman;
+            } if ((fantasmas.fantasmaB.existe == 1) && (i == fantasmaBlinha) && (j == fantasmaBcoluna)) {     //se o fantasma B existe e as variaveis i e j se encontram na posicao do fantasma B...
                     mapas.mapaGeral[i][j] = FANTASMA_ESQUERDA;
-            } if ((fantasmas.fantasmaC.existe == 1) && (i == fantasmaClinha) && (j == fantasmaCcoluna)) {
+            } if ((fantasmas.fantasmaC.existe == 1) && (i == fantasmaClinha) && (j == fantasmaCcoluna)) {     //se o fantasma B existe e as variaveis i e j se encontram na posicao do fantasma C...
                     mapas.mapaGeral[i][j] = FANTASMA_DIREITA;
-            } if ((fantasmas.fantasmaI.existe == 1) && (i == fantasmaIlinha) && (j == fantasmaIcoluna)) {
+            } if ((fantasmas.fantasmaI.existe == 1) && (i == fantasmaIlinha) && (j == fantasmaIcoluna)) {     //se o fantasma B existe e as variaveis i e j se encontram na posicao do fantasma I...
                     mapas.mapaGeral[i][j] = FANTASMA_BAIXO;
-            } if ((fantasmas.fantasmaP.existe == 1) && (i == fantasmaPlinha) && (j == fantasmaPcoluna)) {
+            } if ((fantasmas.fantasmaP.existe == 1) && (i == fantasmaPlinha) && (j == fantasmaPcoluna)) {     //se o fantasma B existe e as variaveis i e j se encontram na posicao do fantasma P...
                     mapas.mapaGeral[i][j] = FANTASMA_CIMA;
             }
         }
@@ -1216,14 +1223,14 @@ tMapa AtualizaMapa(tMapa mapas, tPacMan pacMan, tFantasmas fantasmas, int linha,
     return mapas;
 }
 
-tMapa AtualizaMapaMod(tMapa mapas, tPacMan pacMan, tFantasmas fantasmas, int linha, int coluna) {
+tMapa AtualizaMapaMod(tMapa mapas, tPacMan pacMan, tFantasmas fantasmas, int linha, int coluna) {        //atualiza o mapa de comidas que modificam o pacman;
     int pacManLinha = pacMan.posicaoPacMan.linha;     int pacManColuna = pacMan.posicaoPacMan.coluna;
     int i=0, j=0;
 
     for (i=0; i<linha; i++) {
         for (j=0; j<coluna; j++) {
-            if ((pacMan.vida == 1) && (i == pacManLinha) && (j == pacManColuna)) {
-                mapas.mapaGeral[i][j] = PACMAN_MODIFICADO;
+            if ((pacMan.vida == 1) && (i == pacManLinha) && (j == pacManColuna)) {         //se o pacman esta vivo e as variaveis i e j se encontram na posicao do pacman modificado...
+                mapas.mapaGeral[i][j] = PACMAN_MODIFICADO;                                 //atualiza no mapa geral com o caractere do pacman modificado;
             }
         }
     }
@@ -1231,7 +1238,7 @@ tMapa AtualizaMapaMod(tMapa mapas, tPacMan pacMan, tFantasmas fantasmas, int lin
     return mapas;
 }
 
-void ImprimeMapaAtual(int linha, int coluna, tMapa mapas, tPacMan pacMan, char jogada) {                          //imprime o mapa na sua situacao atual apos cada jogada e sua pontuacao acumulada ate entao;
+void ImprimeMapaAtual(int linha, int coluna, tMapa mapas, tPacMan pacMan, char jogada) {     //imprime o mapa na sua situacao atual apos cada jogada e sua pontuacao acumulada ate entao;
     int i=0, j=0;
 
     printf("Estado do jogo apos o movimento '%c':\n", jogada);
@@ -1245,12 +1252,12 @@ void ImprimeMapaAtual(int linha, int coluna, tMapa mapas, tPacMan pacMan, char j
     printf("\n");
 }
 
-int PacManNoMapa(int linha, int coluna, tMapa mapas) {                            //verifica se o pacMan ainda ta no mapa;
-    int pacManNoMapa=0, i=0, j=0;                         //inicializa a variavel pacManNoMapa zerada;          
+int PacManNoMapa(int linha, int coluna, tMapa mapas) {           //verifica se o pacMan ainda ta no mapa;
+    int pacManNoMapa=0, i=0, j=0;                                //inicializa a variavel pacManNoMapa zerada;          
 
     for (i=0; i<linha; i++) {                                          
         for (j=0; j<coluna; j++) {
-            if ((mapas.mapaGeral[i][j]==PACMAN) || (mapas.mapaGeral[i][j]==PACMAN_MODIFICADO)) {        //se o pacMan estiver no mapa ainda, determina 1 para a variavel e retorna; 
+            if ((mapas.mapaGeral[i][j]==PACMAN) || (mapas.mapaGeral[i][j]==PACMAN_MODIFICADO)) {     //se o pacMan estiver no mapa ainda, determina 1 para a variavel e retorna; 
                 pacManNoMapa = 1;
             }
         }
@@ -1259,20 +1266,20 @@ int PacManNoMapa(int linha, int coluna, tMapa mapas) {                          
     return pacManNoMapa;
 }
 
-void DocumentoTrilha(tMapa mapas, int linha, int coluna, int i, char caminho[]) {                //funcao que faz a trilha pela qual o pacMan percorreu durante a partida;
+void DocumentoTrilha(tMapa mapas, int linha, int coluna, int i, char caminho[]) {     //funcao que faz a trilha pela qual o pacMan percorreu durante a partida;
     FILE *docTrilha;
-    int l=0, j=0, g=0;
+    int l=0, j=0;
     char caminhoTrilha[1045];
 
     sprintf(caminhoTrilha, "%s/saida/trilha.txt", caminho);
 
-    docTrilha = fopen(caminhoTrilha, "w");                               //cria ou subescreve o documento trilha.txt";
+    docTrilha = fopen(caminhoTrilha, "w");                            //cria ou subescreve o documento trilha.txt;
 
     for (l=0; l<linha; l++) {
         for (j=0; j<coluna; j++) {
             if (mapas.trilha[l][j] != -1) {                          //se o que estiver inserido nessa posicao da trilha for maior ou igual a 0...
-                fprintf(docTrilha, "%d ", mapas.trilha[l][j]);      //vai imprimir o valor de i nessa posicao, indicando o caminho que o pacMan percorreu;
-            } else {                                                     //mas, se o valor nessa posicao da trilha for menor que 0, ou seja, estiver igual a -1 por conta da inicializacao feita anteriormente...
+                fprintf(docTrilha, "%d ", mapas.trilha[l][j]);           //vai imprimir o valor de i nessa posicao, indicando o caminho que o pacMan percorreu;
+            } else {                                                 //mas, se o valor nessa posicao da trilha for menor que 0, ou seja, estiver igual a -1 por conta da inicializacao feita anteriormente...
                 fprintf(docTrilha, "# ");                                //vai imprimir uma hashtag, que significa que o pacMan nao passou por esta posicao no mapa;
             }
         }
@@ -1282,27 +1289,27 @@ void DocumentoTrilha(tMapa mapas, int linha, int coluna, int i, char caminho[]) 
     fclose(docTrilha);
 }
 
-void DocumentoResumo(tPacMan pacMan, int i, char jogada, char argv[]) {                 //funcao que faz o documento de resumo;
+void DocumentoResumo(tPacMan pacMan, int i, char jogada, char argv[]) {        //funcao que faz o documento resumo.txt;
     FILE *docResumo;
     char caminhoResumo[1045];
 
     sprintf(caminhoResumo, "%s/saida/resumo.txt", argv);
 
-    docResumo = fopen(caminhoResumo, "a");                                          //cria o documento ou adiciona mais informacoes ao final se ja existir;
-    if (pacMan.colidiuFantasma[i] == 1) {                                    //se o pacm colidiu com um fantasma nessa jogada, adiciona o tipo de movimento e o numero da jogada;
+    docResumo = fopen(caminhoResumo, "a");                                     //cria o documento ou adiciona mais informacoes ao final se ja existir;
+    if (pacMan.colidiuFantasma[i] == 1) {                                      //se o pacman colidiu com um fantasma nessa jogada, adiciona o tipo de movimento e o numero da jogada;
         fprintf(docResumo, "Movimento %d (%c) fim de jogo por encostar em um fantasma\n", i, jogada);
     }
     if (pacMan.pegouComida[i] == 1) {                                          //se o pacman consumiu uma comida nessa jogada, adiciona o tipo de movimento e o numero da jogada;
         fprintf(docResumo, "Movimento %d (%c) pegou comida\n", i, jogada);
     } 
-    if (pacMan.colidiuParede[i] == 1) {                                      //se o pacman colidiu com uma parede nessa jogada, adiciona o tipo de movimento e o numero da jogada;
+    if (pacMan.colidiuParede[i] == 1) {                                        //se o pacman colidiu com uma parede nessa jogada, adiciona o tipo de movimento e o numero da jogada;
         fprintf(docResumo, "Movimento %d (%c) colidiu na parede\n", i, jogada);
     }
     
     fclose(docResumo);
 }
 
-void DocumentoRanking(tMovimentos movimentos, char caminho[]) {                     //funcao que faz o documento do ranking;
+void DocumentoRanking(tMovimentos movimentos, char caminho[]) {         //funcao que faz o documento ranking.txt;
     FILE *docRanking;
     char caminhoRanking[1045];
 
@@ -1310,14 +1317,15 @@ void DocumentoRanking(tMovimentos movimentos, char caminho[]) {                 
 
     docRanking = fopen(caminhoRanking, "w");
     int i=0, j=0;
-    char movimento[4] = {'w', 'a', 'd', 's'};
+
+    char movimento[4] = {CIMA, ESQUERDA, DIREITA, BAIXO};         //inicia listas da quantidade de vezes que cada movimento consumiu uma comida, colidiu com uma parede ou foi usado;        
     int qtdComeu[4] = {movimentos.movimentoW.comeu, movimentos.movimentoA.comeu, movimentos.movimentoD.comeu, movimentos.movimentoS.comeu};
     int qtdBateu[4] = {movimentos.movimentoW.bateu, movimentos.movimentoA.bateu, movimentos.movimentoD.bateu, movimentos.movimentoS.bateu};
     int qtd[4] = {movimentos.movimentoW.qtd, movimentos.movimentoA.qtd, movimentos.movimentoD.qtd, movimentos.movimentoS.qtd};
 
     for(i=0; i<4; i++) {
         for (j=i+1; j<4; j++) {
-            if ((qtdComeu[j] > qtdComeu[i]) || 
+            if ((qtdComeu[j] > qtdComeu[i]) ||                  
                 (qtdComeu[j] == qtdComeu[i]) && (qtdBateu[j] < qtdBateu[i]) || 
                 (qtdComeu[j] == qtdComeu[i]) && (qtdBateu[j] == qtdBateu[i]) && (qtd[j] > qtd[i]) || 
                 (qtdComeu[j] == qtdComeu[i]) && (qtdBateu[j] == qtdBateu[i]) && (qtd[j] == qtd[i]) && 
@@ -1341,7 +1349,7 @@ void DocumentoRanking(tMovimentos movimentos, char caminho[]) {                 
     fclose(docRanking);
 }
 
-void DocumentoEstatisticas(tMovimentos movimentos, char argv[]) {               //funcao que faz o documento de estatisticas das jogadas;
+void DocumentoEstatisticas(tMovimentos movimentos, char argv[]) {        //funcao que faz o documento estatisticas.txt das jogadas;
     FILE *docEstatis;
     int jogadasSemPonto, jogadasBateuParede;
     char caminhoEstatis[1045];
@@ -1350,7 +1358,7 @@ void DocumentoEstatisticas(tMovimentos movimentos, char argv[]) {               
 
     docEstatis = fopen(caminhoEstatis, "w");
 
-    fprintf(docEstatis, "Numero de movimentos: %d\n", movimentos.qtdJogadas);          //imprime o total de movimentos feitos na jogada;       
+    fprintf(docEstatis, "Numero de movimentos: %d\n", movimentos.qtdJogadas);               //imprime o total de movimentos feitos na jogada;       
 
     jogadasSemPonto = movimentos.qtdJogadas - (movimentos.movimentoA.comeu + movimentos.movimentoD.comeu + movimentos.movimentoS.comeu + movimentos.movimentoW.comeu);
     fprintf(docEstatis, "Numero de movimentos sem pontuar: %d\n", jogadasSemPonto);         //imprime a quantidade de jogadas sem pontuar, ou seja, sem consumir uma comida;
@@ -1358,20 +1366,20 @@ void DocumentoEstatisticas(tMovimentos movimentos, char argv[]) {               
     jogadasBateuParede = movimentos.movimentoA.bateu + movimentos.movimentoD.bateu + movimentos.movimentoS.bateu + movimentos.movimentoW.bateu;
     fprintf(docEstatis, "Numero de colisoes com parede: %d\n", jogadasBateuParede);         //imprime a quantidade de jogadas que fizeram o pacMan colidir com uma parede;
 
-    fprintf(docEstatis, "Numero de movimentos para baixo: %d\n", movimentos.movimentoS.qtd);        //imprime a quantidade de jogadas para baixo usadas na partida;
-    fprintf(docEstatis, "Numero de movimentos para cima: %d\n", movimentos.movimentoW.qtd);         //imprime a quantidade de jogadas para cima usadas na partida;
-    fprintf(docEstatis, "Numero de movimentos para esquerda: %d\n", movimentos.movimentoA.qtd);     //imprime a quantidade de jogadas para a esquerda usadas na partida;
-    fprintf(docEstatis, "Numero de movimentos para direita: %d\n", movimentos.movimentoD.qtd);      //imprime a quantidade de jogadas para a direita uusadas na partida;
+    fprintf(docEstatis, "Numero de movimentos para baixo: %d\n", movimentos.movimentoS.qtd);      //imprime a quantidade de jogadas para baixo usadas na partida;
+    fprintf(docEstatis, "Numero de movimentos para cima: %d\n", movimentos.movimentoW.qtd);       //imprime a quantidade de jogadas para cima usadas na partida;
+    fprintf(docEstatis, "Numero de movimentos para esquerda: %d\n", movimentos.movimentoA.qtd);   //imprime a quantidade de jogadas para a esquerda usadas na partida;
+    fprintf(docEstatis, "Numero de movimentos para direita: %d\n", movimentos.movimentoD.qtd);    //imprime a quantidade de jogadas para a direita uusadas na partida;
 
     fclose(docEstatis);
 }
 
-void PacManMorreu(tPacMan pacMan) {                                           //imprime a mensagem que o usuario perdeu;
+void PacManMorreu(tPacMan pacMan) {             //imprime a mensagem que o usuario perdeu;
     printf ("Game over!\n");
     printf ("Pontuacao final: %d\n", pacMan.pontuacao);
 }
 
-void PacManGanhou(tPacMan pacMan) {                                           //imprime a mensagem que o usuario ganhou;
+void PacManGanhou(tPacMan pacMan) {             //imprime a mensagem que o usuario ganhou;
     printf ("Voce venceu!\n");
     printf ("Pontuacao final: %d\n", pacMan.pontuacao);
 }
