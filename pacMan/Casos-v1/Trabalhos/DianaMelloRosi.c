@@ -2,8 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-
-//define para elementos mudam constantemente no mapa:
+//define para elementos que mudam constantemente no mapa:
 #define PACMAN '>'                                          //define para qual caractere no mapa eh o pacMan;
 #define FANTASMA_ESQUERDA 'B'                               //define para qual caractere no mapa eh o fantasma que tem o sentido inicial para a esquerda;
 #define FANTASMA_DIREITA 'C'                                //define para qual caractere no mapa eh o fantasma que tem o sentido inicial para a direita;
@@ -11,7 +10,7 @@
 #define FANTASMA_CIMA 'P'                                   //define para qual caractere no mapa eh o fantasma que tem o sentido inicial para cima;
 #define PACMAN_MODIFICADO '&'                               //define para qual caractere no mapa eh o pacMan modificado;
 
-//deifne para qual sentido os fantasmas estao indo;
+//define para qual sentido os fantasmas estao indo:
 #define SENTIDO_ESQUERDA 'e'
 #define SENTIDO_DIREITA 'd'
 #define SENTIDO_CIMA 'c'
@@ -61,7 +60,7 @@ typedef struct {                            //STRUCT DO PACMAN:
     int pegouComida[5000];                  //contem o vetor de verificacao de quais jogadas o pacMan consumiu uma comida;
     int colidiuFantasma[5000];              //contem o vetor de verificacao de quais jogadas o pacMan colidiu com um fantasma;
     int vida;                               //contem a verificacao da vida do pacMan;
-    int pegouMod;
+    int pegouMod;                           //contem a verificacao se o pacMan esta modificado;
 } tPacMan;
 
 
@@ -95,9 +94,8 @@ typedef struct {                            //STRUCT DOS MAPAS:
     char mapaTeleportes[41][101];           //contem o mapa dos teleportes;
     int trilha[41][101];                    //contem o mapa da trilha;
     char mapaComidaEspecial[41][101];       //contem o mapa da comida especial;
-    char mapaComidaMod[41][101];            //contem o mapa da comdia que modifica o pacMan;
+    char mapaComidaMod[41][101];            //contem o mapa da comida que modifica o pacMan;
 } tMapa;
-
 
 
 typedef struct {                            //STRUCT DO JOGO:
@@ -111,7 +109,7 @@ typedef struct {                            //STRUCT DO JOGO:
     tTeleportes teleporte;                  //contem a struct de teleportes;         
     tMovimentos movimentos;                 //contem a struct das jogadas feitas;
     tPosicao comidaEspecial;                //contem a struct da posicao da comida especial que da um bonus de 5 pontos na pontuacao final do pacMan;
-    tPosicao comidaMod;                     //contem a struct da posicao da comdia que modifica o caractere do pacMan;
+    tPosicao comidaMod;                     //contem a struct da posicao da comida que modifica o caractere do pacMan;
 } tJogo;
 
 
@@ -162,7 +160,6 @@ void PacManGanhou(tPacMan pacMan);
 
 
 int main (int argc, char * argv[]) {
-    
     if (argc <= 1) {                                                                                    
         printf ("ERRO: O diretorio de arquivos de configuracao nao foi informado\n");
         exit(0);
@@ -206,9 +203,9 @@ tJogo IniciarJogo(char argv[]) {
     
     jogo.mapas.trilha[posicaoLinhaInicial][posicaoColunaInicial] = 0;           //determina a posicao inicial do pacMan na trilha;
     
-    jogo.fantasmas = ProcuraFantasmas(jogo.mapas, jogo.linha, jogo.coluna);                                             //chama a funcao que acha os fantasmas no mapa e guarda a posicao;            
-    jogo.teleporte = ProcuraTeleporte(jogo.mapas, jogo.linha, jogo.coluna);                                             //chama a funcao que acha os teleportes no mapa e guarda a posicao;    
-    jogo.qtdComidas = ContaQuantasComidas(jogo.mapas, jogo.linha, jogo.coluna);                                         //chama a funcao que conta as comidas que tem no mapa;
+    jogo.fantasmas = ProcuraFantasmas(jogo.mapas, jogo.linha, jogo.coluna);                       //chama a funcao que acha os fantasmas no mapa e guarda a posicao;            
+    jogo.teleporte = ProcuraTeleporte(jogo.mapas, jogo.linha, jogo.coluna);                       //chama a funcao que acha os teleportes no mapa e guarda a posicao;    
+    jogo.qtdComidas = ContaQuantasComidas(jogo.mapas, jogo.linha, jogo.coluna);                   //chama a funcao que conta as comidas que tem no mapa;
     jogo.comidaEspecial = EncontraComidaEspecial(jogo.mapas, jogo.linha, jogo.coluna);
     jogo.comidaMod = EncontraComidaMod(jogo.mapas, jogo.linha, jogo.coluna);
     DocumentoInicializacao(jogo.mapas, jogo.coluna, jogo.linha, posicaoLinhaInicial, posicaoColunaInicial, argv);                                                              
@@ -237,8 +234,8 @@ tMapa LeMapa(FILE *mapaEncontrado, int linha, int coluna) {             //funcao
             fscanf(mapaEncontrado, "%c", &mapas.mapaGeral[i][j]);       //le caractere por caractere do mapa e insere no mapa geral;          
             mapas.mapaComidas[i][j] = mapas.mapaGeral[i][j];            //iguala o mapa de comidas ao mapa geral;
             mapas.mapaTeleportes[i][j] = mapas.mapaGeral[i][j];         //iguala o mapa de teleportes ao mapa geral;
-            mapas.mapaComidaEspecial[i][j] = mapas.mapaGeral[i][j];
-            mapas.mapaComidaMod[i][j] = mapas.mapaGeral[i][j];
+            mapas.mapaComidaEspecial[i][j] = mapas.mapaGeral[i][j];     //iguala o mapa de comidas especiais ao mapa geral;
+            mapas.mapaComidaMod[i][j] = mapas.mapaGeral[i][j];          //iguala o mapa de comidas que modificam o pacman ao mapa geral;
             mapas.trilha[i][j] = -1;                                    //inicia todas as posicoes da trilha com -1;
         }
         fscanf(mapaEncontrado, "%*c");
@@ -247,7 +244,7 @@ tMapa LeMapa(FILE *mapaEncontrado, int linha, int coluna) {             //funcao
     return mapas;
 }
 
-tPacMan ProcuraPacMan(tMapa mapas, int linha, int coluna) {       //procura o pacMan no mapa;
+tPacMan ProcuraPacMan(tMapa mapas, int linha, int coluna) {      //procura o pacMan no mapa;
     int i=0, j=0;
     tPacMan pacMan;
     
@@ -263,10 +260,10 @@ tPacMan ProcuraPacMan(tMapa mapas, int linha, int coluna) {       //procura o pa
     return pacMan;
 }
 
-tFantasmas ProcuraFantasmas(tMapa mapas, int linha, int coluna) {        //procura todos os fantasmas do mapa;
+tFantasmas ProcuraFantasmas(tMapa mapas, int linha, int coluna) {          //procura todos os fantasmas do mapa;
     tFantasmas fantasmas;
     int i=0, j=0;
-    fantasmas.fantasmaB.existe = 0;     fantasmas.fantasmaP.existe = 0;
+    fantasmas.fantasmaB.existe = 0;     fantasmas.fantasmaP.existe = 0;    //inicializa os fantasmas como se todos nao existissem, ou seja, sao iguais a zero;
     fantasmas.fantasmaI.existe = 0;     fantasmas.fantasmaC.existe = 0;
 
     for (i=0; i<linha; i++) {
@@ -316,14 +313,14 @@ tTeleportes ProcuraTeleporte(tMapa mapas, int linha, int coluna) {      //procur
     return teleporte;
 }
 
-tPosicao EncontraComidaEspecial(tMapa mapas, int linha, int coluna) {
+tPosicao EncontraComidaEspecial(tMapa mapas, int linha, int coluna) {   //procura as comidas especiais e guarda as suas posicoes;
     tPosicao comidaEspecial;
     int i=0, j=0;
 
     for (i=0; i<linha; i++) {
         for (j=0; j<coluna; j++) {
-            if (mapas.mapaGeral[i][j] == COMIDA_ESPECIAL) {
-                comidaEspecial.linha = i;
+            if (mapas.mapaGeral[i][j] == COMIDA_ESPECIAL) {             //se achar uma comida especial...
+                comidaEspecial.linha = i;                               //guarda a coluna e a linha do mapa em que se encontra;
                 comidaEspecial.coluna = j;
             }
         }
@@ -332,14 +329,14 @@ tPosicao EncontraComidaEspecial(tMapa mapas, int linha, int coluna) {
     return comidaEspecial;
 }
 
-tPosicao EncontraComidaMod(tMapa mapas, int linha, int coluna) {
+tPosicao EncontraComidaMod(tMapa mapas, int linha, int coluna) {     //procura as comidas que modificam o pacman e guarda as suas posicoes;
     tPosicao comidaMod;
     int i=0, j=0;
 
     for (i=0; i<linha; i++) {
         for (j=0; j<coluna; j++) {
-            if (mapas.mapaGeral[i][j] == COMIDA_MOD_PACMAN) {
-                comidaMod.linha = i;
+            if (mapas.mapaGeral[i][j] == COMIDA_MOD_PACMAN) {        //se encontrar uma dessas comidas...
+                comidaMod.linha = i;                                 //guarda a coluna e a linha do mapa em que se encontra;
                 comidaMod.coluna = j;
             }
         }
@@ -362,6 +359,7 @@ int ContaQuantasComidas(tMapa mapas, int linha, int coluna) {          //conta a
     return qtdComidas;
 }
 
+//funcao que cria o doc inicializacao.txt, onde tem o mapa e a posicao inicial do pacman
 void DocumentoInicializacao(tMapa mapas, int coluna, int linha, int posicaoLinhaInicial, int posicaoColunaIniciaL, char argv[]) {           
     FILE *docInicializa;
     int i=0, j=0;
@@ -382,7 +380,7 @@ void DocumentoInicializacao(tMapa mapas, int coluna, int linha, int posicaoLinha
     fclose(docInicializa);
 }
 
-void JogarPartida(tJogo jogo, char argv[]) {             //funcao em que o jogador ira inserir suas jogadas;
+void JogarPartida(tJogo jogo, char argv[]) {            //funcao em que o jogador ira inserir suas jogadas;
     int i=1, contMod=0;
     char jogada;
     char caminho[1045];
@@ -405,55 +403,55 @@ void JogarPartida(tJogo jogo, char argv[]) {             //funcao em que o jogad
                             
         jogo.movimentos = ContaJogadas(jogo.movimentos, jogada);
 
-        jogo.pacMan.colidiuParede[i] = 0;   jogo.pacMan.usouTeleporte[i] = 0;                      
+        jogo.pacMan.colidiuParede[i] = 0;   jogo.pacMan.usouTeleporte[i] = 0;                               //inicia todas as acoes do pacman como zero;
         jogo.pacMan.pegouComida[i] = 0;     jogo.pacMan.colidiuFantasma[i] = 0;                   
 
-        jogo.fantasmas = VerificaParedeFantasma(jogo.mapas, jogo.fantasmas);                    
-        jogo = MovimentaFantasmas(jogo, jogada, i);            
-        jogo.mapas = AtualizaMapa(jogo.mapas, jogo.pacMan, jogo.fantasmas, jogo.linha, jogo.coluna);                  
+        jogo.fantasmas = VerificaParedeFantasma(jogo.mapas, jogo.fantasmas);                                //verifica se em frente dos fantasmas tem uma parede, porque se tiver, ele trocara o sentido do fantasma;     
+        jogo = MovimentaFantasmas(jogo, jogada, i);                                                         //movimenta os fantasmas de acordo com o sentido e direcao em que eles estao;
+        jogo.mapas = AtualizaMapa(jogo.mapas, jogo.pacMan, jogo.fantasmas, jogo.linha, jogo.coluna);        //atualiza o mapa para podermos movimentar o pacman
         
-        if (jogo.pacMan.vida != 0) {
+        if (jogo.pacMan.vida != 0) {                                                                        //se o pacman estiver vivo...
             jogo = MovimentaPacman(jogo, jogada, i);                                                        //chama a funcao que movimenta o pacMan de acordo com a jogada inserida;
             jogo.mapas = AtualizaMapa(jogo.mapas, jogo.pacMan, jogo.fantasmas, jogo.linha, jogo.coluna);                             
             
-            if (jogo.pacMan.pegouMod != 0) {
-                contMod++;
+            if (jogo.pacMan.pegouMod != 0) {                                                                      //se o pacman consumiu uma comida em que faz mudar o seu caractere do mapa...
+                contMod++;                                                                                        
                 if ((contMod > 0) && (contMod <= 15)) {
-                    jogo.mapas = AtualizaMapaMod(jogo.mapas, jogo.pacMan, jogo.fantasmas, jogo.linha, jogo.coluna);
+                    jogo.mapas = AtualizaMapaMod(jogo.mapas, jogo.pacMan, jogo.fantasmas, jogo.linha, jogo.coluna);   //atualiza o mapa com o pacman modificado se nao tiver ultrapassado 15 jogadas em que o pacman ja esta modificado;
 
                     if (contMod == 15) {
                         contMod = 0;
-                        jogo.pacMan.pegouMod = 0;
+                        jogo.pacMan.pegouMod = 0;                                              //se ja tem 15 jogadas que o pacman eh printado modificado, reinicia a verificacao do pacman ter consumido a comida para ele voltar ao seu caractere original;
                     }
                 }
             }
         }
 
-        ImprimeMapaAtual(jogo.linha, jogo.coluna, jogo.mapas, jogo.pacMan, jogada);                        //imprime a situacao do mapa apos toda jogada, com as posicoes novas dos fantasmas e do pacMan;
+        ImprimeMapaAtual(jogo.linha, jogo.coluna, jogo.mapas, jogo.pacMan, jogada);            //imprime a situacao do mapa apos toda jogada, com as posicoes novas dos fantasmas e do pacMan;
 
         if (PacManNoMapa(jogo.linha, jogo.coluna, jogo.mapas) != 1) {        //se a funcao que verifica se o pacMan ainda esta no mapa retornar algo diferente de 1, quer dizer que ele foi morto por um fantasma;
-            jogo.pacMan.colidiuFantasma[i] = 1;                             //atualiza que o pacMan colidiu com um fantasma para que essa informacao esteja no documento de resumo;
+            jogo.pacMan.colidiuFantasma[i] = 1;                              //atualiza que o pacMan colidiu com um fantasma para que essa informacao esteja no documento de resumo;
             DocumentoResumo(jogo.pacMan, i, jogada, caminho);         
             PacManMorreu(jogo.pacMan);                                 
             break;                                              
         }
 
-        DocumentoTrilha(jogo.mapas, jogo.linha, jogo.coluna, i, caminho);            
-        DocumentoResumo(jogo.pacMan, i, jogada, caminho);              
+        DocumentoTrilha(jogo.mapas, jogo.linha, jogo.coluna, i, caminho);   //chama a funcao que faz a trilha do pacman;   
+        DocumentoResumo(jogo.pacMan, i, jogada, caminho);                   //chama a funcao que faz o resumo da partida;
         
-        if (jogo.qtdComidas == 0) {                             
-            PacManGanhou(jogo.pacMan);                                 
+        if (jogo.qtdComidas == 0) {                        //se as comidas acabaram, ou seja, o pacman consumiu todas...
+            PacManGanhou(jogo.pacMan);                     //o jogador ganhou a partida;
             break;                                                    
         }
-        if (jogo.pacMan.vida == 0) {                            
-            PacManMorreu(jogo.pacMan);                                  
+        if (jogo.pacMan.vida == 0) {                       //se o pacman esta morto...
+            PacManMorreu(jogo.pacMan);                     //o jogador perdeu a partida;
             break;                                             
         }
         i++;
     }
                                                                                 
-    DocumentoRanking(jogo.movimentos, caminho);                            
-    DocumentoEstatisticas(jogo.movimentos, caminho);                    
+    DocumentoRanking(jogo.movimentos, caminho);            //apos o fim da partida, chama a funcao que faz o ranking das jogadas;               
+    DocumentoEstatisticas(jogo.movimentos, caminho);       //chama a funcao que faz o documento de estatisticas da partida;
 }
 
 tMovimentos InicializaMovimentos() {
